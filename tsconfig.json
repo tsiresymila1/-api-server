@@ -14,7 +14,6 @@
         "skipLibCheck": true,
         "outDir": "./esm2015",
         "declarationDir": "./esm2015/",
-        "types": ["./esm2015/"],
         "typeRoots": ["./node_modules/@types"]
 
     },

@@ -1,18 +1,19 @@
 {
-    "name": "@api/server",
-    "version": "1.0.0",
-    "description": "APi Server with open api interface",
+    "name": "easy-ts-api",
+    "version": "1.0.3",
+    "description": "Api Server with open api interface",
     "main": "esm2015/index.js",
     "module": "./esm2015/index.js",
     "types": "esm2015",
     "scripts": {
         "dev": "nodemon -L exemple/index.ts",
         "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "cd esm2015 && del /s *.d.ts && cd .. &&  tsc",
         "publish": "npm publish --access=public"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/tsiresymila16/api-server.git"
+        "url": "git+https://github.com/tsiresymila16/-api-server.git"
     },
     "keywords": [
         "api",
@@ -34,9 +35,9 @@
     "author": "Tsiresy Milà",
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/tsiresymila16/api-server/issues"
+        "url": "https://github.com/tsiresymila16/-api-server/issues"
     },
-    "homepage": "https://github.com/tsiresymila16/api-server#readme",
+    "homepage": "https://github.com/tsiresymila16/-api-server#readme",
     "dependencies": {
         "@types/cookie": "^0.4.1",
         "@types/globby": "^9.1.0",

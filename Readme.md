@@ -4,12 +4,12 @@ API SERVER is an ts module that have for goal to create MVC pattern with express
 
 *Installing* 
 
-    npm install --save @api/server 
+    npm install --save easy-ts-api 
     
 After that you create config file inside config/app.ts
 
 ```ts
-    import { ServerOption } from "@api/server";
+    import { ServerOption } from "easy-ts-api";
     import path from "path";
     export const serverOption: ServerOption = {
         controllers: [path.join(__dirname, '..', '/controllers/**/*Controller.ts')],
@@ -25,7 +25,7 @@ After that you can create server via express or fastify
 
 ```ts
 import "reflect-metadata";
-import { FastifyApplication, AppFactory, App } from '@api/server';
+import { FastifyApplication, AppFactory, App } from 'easy-ts-api';
 import {serverOption} from './config/app.ts'
 // Fasify instance
 async function bootstrap() {
@@ -43,7 +43,7 @@ bootstrap()
 
 ```ts
 import "reflect-metadata";
-import { ExpressApplication, AppFactory, App } from '@api/server';
+import { ExpressApplication, AppFactory, App } from 'easy-ts-api';
 import {serverOption} from './config/app.ts'
 
 // Express inntance
@@ -61,10 +61,10 @@ bootstrap()
 ## Controller 
 There is an exemple of controller with opeapi 
 ```ts
-import { All, Get, Middleware, OpenApi } from "@api/server"
-import { AppRequest, CookieType, AppResponse } from "@api/server"
-import { Params, Req, Res, Query, Headers, Ip, Session, Cookies } from "@api/server";
-import { Controller } from "@api/server";
+import { All, Get, Middleware, OpenApi } from "easy-ts-api"
+import { AppRequest, CookieType, AppResponse } from "easy-ts-api"
+import { Params, Req, Res, Query, Headers, Ip, Session, Cookies } from "easy-ts-api";
+import { Controller } from "easy-ts-api";
 
 
 
@@ -124,7 +124,7 @@ Middleware is based on express middleware but it can work perfectly with fastify
 
 ```ts
 import { NextFunction,Request,Response } from 'express';
-import { AppMiddleWare } from '@api/server';
+import { AppMiddleWare } from 'easy-ts-api';
 
 export default class ExempleMiddleWare implements AppMiddleWare {
 
@@ -150,7 +150,7 @@ And model is base on sequilize-typescritpt
 
 ```ts
 import { AutoIncrement, Column, Model, PrimaryKey, Table } from "sequelize-typescript";
-import { prop, Schema } from '@api/server';
+import { prop, Schema } from 'easy-ts-api';
 
 @Table({
     timestamps: true,
@@ -170,10 +170,10 @@ export default class User extends Model {
 }
 ```
 
-You can transform Model to body schema or any class
+You can transform Model or any class to body schema 
 
 ```ts
-import { prop, Schema } from '@api/server';
+import { prop, Schema } from 'easy-ts-api';
 
 @Schema()
 export default class RegisterInput {
