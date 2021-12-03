@@ -1,0 +1,11 @@
+version: '3.3'
+
+services:
+
+  mysqldb:
+    ports:
+      - 33306:3306
+
+  phpmyadmin:
+    ports:
+      - 10089:80

@@ -1,0 +1,38 @@
+version: '3.3'
+services:    
+
+  app:
+    image: api-server:latest
+    container_name: api-server
+    build: .
+    depends_on :
+      - mysqldb
+    command : >
+      /bin/sh -c 'npm install --quiet && npm run dev' 
+    volumes :
+      - ./:/usr/app
+      - /usr/app/node_modules
+    environment :
+      - NODE_ENV=development
+
+  mysqldb:
+    image: mysql:5.7
+    container_name: api-serverdb
+    environment:
+      - MYSQL_ROOT_PASSWORD=${PASSWORD}
+      - MYSQL_USER=${USER}
+      - MYSQL_DATABASE=${DATABASE}
+      - MYSQL_PASSWORD=${PASSWORD}
+    command: mysqld --sql_mode=""
+    volumes:
+      - ./data:/var/lib/mysql
+      - ./_bdd:/docker-entrypoint-initdb.d
+
+  phpmyadmin:
+    container_name: sutch_phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    depends_on :
+      - mysqldb
+    environment:
+      - PMA_HOST=mysqldb
+      - PMA_PORT=3306

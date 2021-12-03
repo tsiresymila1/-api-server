@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "ES6",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "sourceMap": true,
+        "moduleResolution": "node",
+        "rootDir": "../",
+        "outDir": ".",
+        "esModuleInterop": true,
+        "allowJs": true,
+        "resolveJsonModule": true,
+        "typeRoots": ["./lib/@types", "./node_modules/@types"]
+
+    },
+    "exclude": [
+        "node_modules",
+        "exemple"
+    ]
+}
