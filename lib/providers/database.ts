@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize-typescript'
-import ENV from './../utils/env';
+import { ENV } from './../utils/env';
 export default new Sequelize({
     database: ENV.Get('DATABASE'),
     host: ENV.Get('HOST'),

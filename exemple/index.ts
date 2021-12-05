@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { App, ExpressApplication, AppFactory } from "../esm2015";
+import { App, ExpressApplication, AppFactory } from "../lib";
 import { serverOption } from './config/app';
 
 

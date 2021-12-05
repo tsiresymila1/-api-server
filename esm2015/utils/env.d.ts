@@ -1,3 +1,3 @@
-export default class ENV {
+export declare class ENV {
     static Get(params: any): any;
 }

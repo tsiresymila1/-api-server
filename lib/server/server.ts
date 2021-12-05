@@ -10,8 +10,9 @@ import path from 'path';
 import glob from 'glob';
 import swagger from 'swagger-schema-official'
 import { registerController, registerMiddleware } from '../@decorators';
-import { Sequelize } from 'sequelize-typescript';
+import { Model, ModelCtor, Sequelize } from 'sequelize-typescript';
 import database from '../providers/database';
+import { ENV } from './../utils/env';
 var globule = require('globule');
 
 export class App {
@@ -40,10 +41,15 @@ export class App {
         await this.config()
         // loads models 
         if (this.options.models) {
-            this.db.addModels(this.options.models);
+            const modelsFinds = this.options?.models?.reduce<(string | ModelCtor<Model<any, any>>)[]>((p, n) => {
+                const s = String(n) + String(ENV.Get('EXTENSION') ?? '.ts')
+                p.push(s)
+                return p;
+            }, []) ?? []
+            this.db.addModels(modelsFinds);
         }
         else {
-            this.db.addModels([path.join(process.cwd(), 'models/**/*Model.ts')]);
+            this.db.addModels([path.join(process.cwd(), 'models/**/*Model') + String(ENV.Get('EXTENSION') ?? '.ts')]);
         }
         await this.db.sync({ force: true, alter: true })
         this.app['use']((req, res, next) => {
@@ -69,8 +75,13 @@ export class App {
     public async setup() {
         // load middlewares 
         if (Array.isArray(this.options.middlewares) && this.options.middlewares.length > 0 && (this.options.middlewares as any[]).every(t => typeof t === "string")) {
-            (this.options.middlewares as String[]).push('!**/Inject*.ts')
-            let middlewares = globule.find(this.options.middlewares)
+            (this.options.middlewares as String[]).push('!**/Inject*')
+            const middlewaresFind = (this.options.middlewares as String[])?.reduce((p, n) => {
+                const s = String(n) + String(ENV.Get('EXTENSION') ?? '.ts')
+                p.push(s)
+                return p;
+            }, [] as string[]) ?? []
+            let middlewares = globule.find(middlewaresFind)
             for (let mwr of middlewares) {
                 let middlewareFunction = require(mwr).default as (new () => AppMiddleWare);
                 this.middlewares['/'].push(middlewareFunction)
@@ -92,7 +103,7 @@ export class App {
         // load controllers 
         for (let controller of this.options.controllers || []) {
             if (typeof controller === "string") {
-                let directory = path.join(controller.toString())
+                let directory = path.join(controller.toString() + String(ENV.Get('EXTENSION') ?? '.ts'))
                 let controllers = glob.sync(directory);
                 for (let ctrl of controllers) {
                     controller = require(ctrl).default as Function;

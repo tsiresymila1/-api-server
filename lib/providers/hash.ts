@@ -1,24 +1,21 @@
-import JWT from 'jsonwebtoken';
-import  ENV  from "./../utils/env";
+import JWT, { Algorithm } from 'jsonwebtoken';
+import { ENV } from "./../utils/env";
 
 export class Hash {
-    public static  generate(user : any, ) {
+    public static generate(id: any, expiresInexp: any = '24h') {
         return JWT.sign({ 
             data : {
-                id : user.id
+                id: id
             }, 
-            expiresInexp: '24h'
+            expiresInexp: expiresInexp
         }, 
-        ENV.Get('KEY'),
-        { 
-            algorithm: 'RS256'
-        }
+            ENV.Get('KEY') ?? 'super_key',
         )
     }
 
     public static auth(token:string) : boolean {
         try {
-            var decoded = JWT.verify(token, ENV.Get('KEY'));
+            JWT.verify(token, ENV.Get('KEY') ?? 'super_key');
             return true
           } catch(err) {
             return false;

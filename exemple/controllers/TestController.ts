@@ -1,4 +1,4 @@
-import { Controller, Get, Params, Headers, OpenApi } from "../../esm2015";
+import { Controller, Get, Params, Headers, OpenApi } from "../../lib";
 
 @Controller({ prefix: '/api' })
 export default class TestController {
