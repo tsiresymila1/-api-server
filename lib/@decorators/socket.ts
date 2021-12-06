@@ -4,15 +4,11 @@ export const OnMessage = (event?: string) => {
     return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
         let value: Function = descriptor.value
         if (target['events']) {
-            target['events'][propertyKey] = {
-                event: event
-            };
+            target['events'][propertyKey] = event;
         }
         else {
             target['events'] = {
-                [propertyKey]: {
-                    event: event
-                }
+                [propertyKey]: event
             }
         }
         descriptor.value = async function (...args: any | null) {
@@ -23,9 +19,36 @@ export const OnMessage = (event?: string) => {
 
 }
 
-export const OnConnection = () => {
+export const OnConnect = () => {
     return OnMessage('connection');
 }
+
+export const OnDisconnect = () => {
+    return OnMessage('disconnect');
+}
+
+
+const Emit = (key: string) => {
+    return (event?: string) => {
+        return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+            if (target[key]) {
+                target[key][propertyKey] = event;
+            }
+            else {
+                target[key] = {
+                    [propertyKey]: event
+                }
+            }
+            return target;
+        }
+
+    }
+}
+
+export const EmitOnSuccess = Emit('success')
+export const EmitOnFail = Emit('error')
+
+
 
 const paramsFactory = (ptype: string) => {
     return (key?: string) => {
@@ -57,6 +80,6 @@ const paramsFactory = (ptype: string) => {
 export const MessageBody = paramsFactory('data')
 export const ConnectedSocket = paramsFactory('socket')
 export const Clients = paramsFactory('clients')
-export const ConnectedId = paramsFactory('id')
+export const SocketId = paramsFactory('id')
 export const ConnectedIds = paramsFactory('ids')
 

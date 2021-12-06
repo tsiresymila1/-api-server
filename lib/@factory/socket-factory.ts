@@ -3,7 +3,10 @@ import { Server, Socket } from 'socket.io';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { ParamsKey } from '..';
 
-const bindParams = (params: ParamsKey[], socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>, data: any, io: Server, anotherSocketId?: any) => {
+type AsyncFunction = (...args: any) => Promise<any>
+
+
+const bindParams = (params: ParamsKey[], socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>, data: any, io: Server) => {
     let methodParams: any[] = []
     params?.forEach((value: ParamsKey, index) => {
         let param: any;
@@ -21,7 +24,7 @@ const bindParams = (params: ParamsKey[], socket: Socket<DefaultEventsMap, Defaul
                 param = io.fetchSockets()
                 break;
             case 'id':
-                param = anotherSocketId
+                param = socket.id
                 break;
         }
         // sey value assigne object
@@ -31,15 +34,16 @@ const bindParams = (params: ParamsKey[], socket: Socket<DefaultEventsMap, Defaul
     });
     return methodParams;
 }
+
 export const registerSocket = async (io: Server, object: Function) => {
     let properties: string[] = Object.getOwnPropertyNames(object.prototype)
-    let method: Function;
+    let method: AsyncFunction;
     const namespace = Object.getOwnPropertyDescriptor(object, 'namespace')?.value
-    const room = Object.getOwnPropertyDescriptor(object, 'room')?.value
+    const room = Object.getOwnPropertyDescriptor(object, 'room')?.value ?? 'socket.io'
     if (properties.includes('connection')) {
         method = object.prototype['connection'];
     }
-    io.of(namespace).on('connection', (socket) => {
+    io.of(namespace).on('connection', async (socket) => {
         socket.join(room);
         if (method) {
             let paramsConnection: ParamsKey[] = object.prototype['params'] ? object.prototype['params']['connection'] ?? [] : []
@@ -50,13 +54,13 @@ export const registerSocket = async (io: Server, object: Function) => {
                 return prev;
             }, [])
             const bindedParams = bindParams(paramsConnection, socket, "user connected", io)
-            method(...bindedParams)
+            await method(...bindedParams)
         }
         socket.use(([event, ...args], next) => {
             next();
         });
         for (let p of properties) {
-            let callback: Function = object.prototype[p];
+            let callback: AsyncFunction = object.prototype[p];
             if (typeof method === 'function' && p !== 'constructor') {
                 let event = object.prototype['events'][p]
                 if (!event || p === "connection") continue;
@@ -68,9 +72,21 @@ export const registerSocket = async (io: Server, object: Function) => {
                     return prev;
                 }, [])
                 // register all socket 
-                socket.on(`${event.event}`, (data: any) => {
+                socket.on(`${event}`, async (data: any) => {
                     const bindedParams = bindParams(params, socket, data, io)
-                    callback(...bindedParams);
+                    try {
+                        const data = await callback(...bindedParams);
+                        const successEvents = object.prototype['success']
+                        if (successEvents && successEvents[p]) {
+                            socket.emit(successEvents[p], data)
+                        }
+                    }
+                    catch (e: any) {
+                        let errorEvents = object.prototype['errors']
+                        if (errorEvents && errorEvents[p]) {
+                            socket.emit(errorEvents[p], e.toString())
+                        }
+                    }
                 })
             }
         }
