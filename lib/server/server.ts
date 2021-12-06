@@ -13,12 +13,14 @@ import { registerController, registerMiddleware } from '../@decorators';
 import { Model, ModelCtor, Sequelize } from 'sequelize-typescript';
 import database from '../providers/database';
 import { ENV } from './../utils/env';
+import { registerSocket } from './../@factory/socket-factory';
+import { Server } from 'socket.io';
 var globule = require('globule');
 
 export class App {
     options?: ServerOption
     openapiOptions?: OpenAPiParams
-    app: Express | FastifyInstance
+    app: Express | FastifyInstance | undefined
     isfastify?: boolean
     db: Sequelize
     middlewares: { [key: string]: (new () => AppMiddleWare)[] } = { "/": [] };
@@ -37,10 +39,10 @@ export class App {
     public setServerOption(options: ServerOption) {
         this.options = options;
     }
-    public async serve(...args) {
+    public async serve(...args: any) {
         await this.config()
         // loads models 
-        if (this.options.models) {
+        if (this.options?.models) {
             const modelsFinds = this.options?.models?.reduce<(string | ModelCtor<Model<any, any>>)[]>((p, n) => {
                 const s = String(n) + String(ENV.Get('EXTENSION') ?? '.ts')
                 p.push(s)
@@ -51,30 +53,33 @@ export class App {
         else {
             this.db.addModels([path.join(process.cwd(), 'models/**/*Model') + String(ENV.Get('EXTENSION') ?? '.ts')]);
         }
-        await this.db.sync({ force: true, alter: true })
-        this.app['use']((req, res, next) => {
+        await this.db.sync({ force: true, alter: true });
+        //register db to request
+        (this.app as any)['use']((req: any, res: any, next: () => void) => {
             req.db = this.db
             next()
         })
+        // setup 
         await this.setup()
     }
 
     public async config() {
+        const app = (this.app as any)
         if (this.options && this.options.cors) {
-            this.app['use'](require('cors')())
+            app['use'](require('cors')())
         }
-        this.app['use'](json(this.options.json ?? { limit: '150mb' }))
-        this.app['use'](urlencoded(this.options.urlencoded ?? { extended: true }));
-        this.app['use'](cookieParser())
-        this.app['use'](cookieSession({
+        // (this.app)['use'](json(this.options && this.options.json ? this.options.json : { limit: '150mb' }))
+        app['use'](urlencoded(this.options && this.options.urlencoded ? this.options.urlencoded : { extended: true }));
+        app['use'](cookieParser())
+        app['use'](cookieSession({
             name: 'session',
-            keys: this.options.sessionSecretKey ?? ['super_secret', 'super_secret']
+            keys: this.options && this.options.sessionSecretKey ? this.options.sessionSecretKey : ['super_secret', 'super_secret'],
         }))
     }
 
     public async setup() {
         // load middlewares 
-        if (Array.isArray(this.options.middlewares) && this.options.middlewares.length > 0 && (this.options.middlewares as any[]).every(t => typeof t === "string")) {
+        if (this.options && Array.isArray(this.options.middlewares) && this.options.middlewares.length > 0 && (this.options.middlewares as any[]).every(t => typeof t === "string")) {
             (this.options.middlewares as String[]).push('!**/Inject*')
             const middlewaresFind = (this.options.middlewares as String[])?.reduce((p, n) => {
                 const s = String(n) + String(ENV.Get('EXTENSION') ?? '.ts')
@@ -87,7 +92,7 @@ export class App {
                 this.middlewares['/'].push(middlewareFunction)
             }
         }
-        else {
+        else if (this.options) {
             this.middlewares['/'].concat(this.options.middlewares as (new () => AppMiddleWare)[])
         }
         // config middlewares 
@@ -101,17 +106,29 @@ export class App {
         this.configMulter()
 
         // load controllers 
-        for (let controller of this.options.controllers || []) {
+        for (let controller of (this.options && this.options.controllers ? this.options.controllers : [])) {
             if (typeof controller === "string") {
-                let directory = path.join(controller.toString() + String(ENV.Get('EXTENSION') ?? '.ts'))
+                let directory = path.join(controller.toString() + String(String(ENV.Get('EXTENSION') ?? '.ts')))
                 let controllers = glob.sync(directory);
                 for (let ctrl of controllers) {
                     controller = require(ctrl).default as Function;
-                    this.spec = await registerController(this.app, controller, this.isfastify, this.options.cookieParams, this.spec)
+                    this.spec = await registerController((this.app as any), controller, this.isfastify ?? false, this.spec, this.options && this.options.cookieParams ? this.options.cookieParams : undefined,)
                 }
             }
             else {
-                this.spec = await registerController(this.app, controller as Function, this.isfastify, this.options.cookieParams, this.spec)
+                this.spec = await registerController((this.app as any), controller as Function, this.isfastify ?? false, this.spec, this.options && this.options.cookieParams ? this.options.cookieParams : undefined)
+            }
+        }
+        // register socket
+        for (let socketPath of (this.options && this.options.sockets ? this.options.sockets : [])) {
+            if (typeof socketPath === "string") {
+                let directory = path.join(socketPath.toString() + (String(ENV.Get('EXTENSION') ?? '.ts')))
+                let sockets = glob.sync(directory);
+                for (let socket of sockets) {
+                    let event = require(socket).default as Function;
+                    let io = this.isfastify ? (this.app as any).io : (this.app as any).get('io') as Server
+                    await registerSocket(io, event)
+                }
             }
         }
         // setup openapi
@@ -128,12 +145,12 @@ export class App {
                 cb(null, file.fieldname + '-' + uniqueSuffix)
             }
         })
-        const upload: Multer = multer(this.options.uploadOption ?? { storage: storage })
+        const upload: Multer = multer(this.options && this.options.uploadOption ? this.options.uploadOption : { storage: storage })
         if (this.isfastify) {
-            this.app['use']('/', upload.any())
+            (this.app as any)['use']('/', upload.any())
         }
         else {
-            this.app['use'](upload.any())
+            (this.app as any)['use'](upload.any())
         }
     }
 
@@ -141,7 +158,7 @@ export class App {
         this.middlewares = middlewares;
     }
 
-    public use(middleware: (new () => AppMiddleWare) | String, callback?: (new () => AppMiddleWare)) {
+    public use(middleware: (new () => AppMiddleWare) | String, callback: (new () => AppMiddleWare)) {
         if (middleware instanceof String) {
             this.middlewares[String(middleware)].push(callback)
         }

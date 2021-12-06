@@ -19,7 +19,7 @@ const methodFactory = (method: string)=>{
                     }
                 }
             }
-            descriptor.value = async function(...args: any[] | null){
+            descriptor.value = async function (...args: any) {
                  return  await value.apply(this,args)
             }
             return target;
@@ -41,7 +41,7 @@ export const Middleware = (middleware: Function) => {
     
 }
 
-export const OpenApi = (options?: swagger.Operation)=>{
+export const OpenApi = (options: swagger.Operation) => {
     return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
         if(!target['paths']){
             target['paths'] = {} 

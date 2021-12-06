@@ -4,13 +4,18 @@ import { ExpressMiddleWare } from "../@types";
 type ControllerOptions = {
     prefix?: string
 }
+
+type SocketControllerOptions = {
+    namespace?: string,
+    room?: string
+}
 export const Controller = (options?: string | ControllerOptions, responseType?: string ) => {
     return (target: Function) => {
         let url: string = '/';
         if(typeof options === 'string'){
             url = options
         }
-        else{
+        else if (options && options.prefix) {
             url = options.prefix 
         }
         Object.defineProperty(target,'baseUrl', {
@@ -24,6 +29,29 @@ export const Controller = (options?: string | ControllerOptions, responseType?: 
 export const JsonController = (baseUrl?: string | ControllerOptions ) => {
     return Controller(baseUrl, 'application/json')
 }
+
+export const SocketController = (options?: string | SocketControllerOptions) => {
+    return (target: Function) => {
+        let namespace: string = '/';
+        let room: string = "socket.io";
+        if (typeof options === 'string') {
+            namespace = options
+        }
+        else if (options && options.namespace) {
+            namespace = options.namespace
+        }
+        if (options && typeof options !== 'string' && options.room) {
+            room = options.room
+        }
+        Object.defineProperty(target, 'namespace', {
+            value: namespace
+        })
+        Object.defineProperty(target, 'room', {
+            value: room
+        })
+    }
+}
+
 
 export default class DefaultMiddleWare implements ExpressMiddleWare {
     public use(req: Request, res: Response, next: NextFunction){

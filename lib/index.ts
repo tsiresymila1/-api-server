@@ -1,6 +1,6 @@
 export * from './@decorators';
 export * from './@decorators/Controller';
-export * from './@decorators/factory';
+export * from './@factory/controller-factory';
 export * from './@decorators/Method';
 export * from './@decorators/Params';
 export * from './@decorators/shema';

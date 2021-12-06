@@ -30,7 +30,6 @@ const optionsValue = { required: true, type: 'string' } as PropOptions;
 export const prop = (options: PropOptions = optionsValue) => {
     return (target: any, propertyKey: PropertyKey) => {
         var t = Reflect.getMetadata("design:type", target, propertyKey.toString());
-        console.log(t)
         const propertyName = `${String(propertyKey)}`
         const isExist: boolean = target.hasOwnProperty('jsonschema');
         if (!isExist) {
@@ -53,7 +52,7 @@ export const prop = (options: PropOptions = optionsValue) => {
 }
 
 export const ref = (ref: Object) => {
-    return (target: Object, propertyKey: PropertyKey) => {
+    return (target: any, propertyKey: PropertyKey) => {
         const propertyName = `${String(propertyKey)}`
         const isExist: boolean = target.hasOwnProperty('jsonschema');
         if (!isExist) {

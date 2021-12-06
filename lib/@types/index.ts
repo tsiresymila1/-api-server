@@ -25,12 +25,14 @@ export interface  ServerOption {
     controllers?: Function[] | String[],
     middlewares?: Function[] | String[],
     models?: (string | ModelCtor<Model<any, any>>)[],
+    sockets?: Function[] | String[],
     uploadOption?: multer.Options,
     json? : OptionsJson
     urlencoded? : OptionsUrlencoded;
     cookieParams?: CookieSerializeOptions,
     staticFolder? :string,
     staticUrl?: string
+    enableSocketIo?: boolean
  }
 
 
@@ -57,6 +59,6 @@ export interface  ServerOption {
  }
 
 export class AppMiddleWare {
-    use: (req: Request, res: Response, next: NextFunction) => void;
+    use: ((req: Request, res: Response, next: NextFunction) => void) | undefined;
 }
 
