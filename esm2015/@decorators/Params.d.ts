@@ -9,3 +9,4 @@ export declare const Session: (key?: string | undefined) => (target: any, proper
 export declare const Cookies: (key?: string | undefined) => (target: any, propertyKey: string, parameterIndex: number) => any;
 export declare const Ip: (key?: string | undefined) => (target: any, propertyKey: string, parameterIndex: number) => any;
 export declare const Database: (key?: string | undefined) => (target: any, propertyKey: string, parameterIndex: number) => any;
+export declare const SocketIO: (key?: string | undefined) => (target: any, propertyKey: string, parameterIndex: number) => any;

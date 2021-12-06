@@ -7,7 +7,7 @@ import { Sequelize } from 'sequelize-typescript';
 export declare class App {
     options?: ServerOption;
     openapiOptions?: OpenAPiParams;
-    app: Express | FastifyInstance;
+    app: Express | FastifyInstance | undefined;
     isfastify?: boolean;
     db: Sequelize;
     middlewares: {
@@ -16,14 +16,14 @@ export declare class App {
     spec: swagger.Spec;
     constructor();
     setServerOption(options: ServerOption): void;
-    serve(...args: any[]): Promise<void>;
+    serve(...args: any): Promise<void>;
     config(): Promise<void>;
     setup(): Promise<void>;
     configMulter(): Promise<void>;
     setMiddlewares(middlewares: {
         '/': (new () => AppMiddleWare)[];
     }): void;
-    use(middleware: (new () => AppMiddleWare) | String, callback?: (new () => AppMiddleWare)): void;
+    use(middleware: (new () => AppMiddleWare) | String, callback: (new () => AppMiddleWare)): void;
     configOpenAPi(openapiOptions: OpenAPiParams): void;
     configOpenApiMiddleware(): Promise<void>;
 }

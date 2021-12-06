@@ -12,8 +12,8 @@ After that you create config file inside config/app.ts
     import { ServerOption } from "easy-ts-api";
     import path from "path";
     export const serverOption: ServerOption = {
-        controllers: [path.join(__dirname, '..', '/controllers/**/*Controller.ts')],
-        middlewares: [path.join(__dirname, '..', '/middlewares/**/*Middleware.ts')],
+        controllers: [path.join(__dirname, '..', '/controllers/**/*Controller')],
+        middlewares: [path.join(__dirname, '..', '/middlewares/**/*Middleware')],
         models: [path.join(__dirname, '..', '/models/**/*Model.ts')]
     }
 
@@ -144,6 +144,7 @@ DRIVER=mysql/postgres/sqlite/mongo
 DATABASE=database
 USER=root
 PASSWORD=password
+EXTENSION=.ts // .js for production
 ```
 And model is base on sequilize-typescritpt 
 
@@ -184,6 +185,68 @@ export default class RegisterInput {
     @prop()
     password: string;
 }
+
+```
+if you want to use socket io with , enable ity in serveroption 
+
+```ts
+export const serverOption: ServerOption = {
+    controllers: [path.join(__dirname, '..', '/controllers/**/*Controller')],
+    middlewares: [path.join(__dirname, '..', '/middlewares/**/*Middleware')],
+    models: [path.join(__dirname, '..', '/models/**/*Model.ts')],
+    sockets: [path.join(__dirname, '..', '/sockets/**/*SocketController')],
+    cors: true,
+    enableSocketIo: true
+}
+```
+
+and Create socket controller 
+
+```ts
+
+import { ConnectedSocket, MessageBody, OnConnection, SocketController } from "easy-ts-api";
+import { OnMessage } from 'easy-ts-api';
+
+@SocketController()
+export default class TestSocketController {
+
+    @OnConnection()
+    public async connection(@ConnectedSocket() socket) {
+        console.log('user connected')
+        console.log(socket.id)
+    }
+
+    @OnMessage('message')
+    public async message(@ConnectedSocket() socket, @MessageBody() data: any) {
+        console.log('Message get : ', data, socket)
+        socket.emit('message', 'got data : ' + data);
+    }
+}
+```
+
+After, you can able to get SokcetIO from controller method params
+
+```ts
+
+...
+    @OpenApi({
+        responses: {
+            '200': {
+                '$ref': '',
+                'description': 'Response',
+            }
+        }
+    })
+    @Middleware(InjectMiddleWare) 
+    @All('/register')
+    public async register(@SocketIO() socket: Server) {
+        console.log(socket)
+        return {
+            name: 'register',
+        }
+    }
+
+...
 
 ```
 ### Tsiresy Milà

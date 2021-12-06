@@ -1,7 +1,5 @@
 
-import { ConnectedSocket, MessageBody, OnConnection, SocketController } from "../../lib";
-import { OnMessage } from './../../lib/';
-
+import { ConnectedSocket, MessageBody, OnConnection, SocketController, OnMessage } from "../../lib";
 @SocketController()
 export default class TestSocketController {
 
