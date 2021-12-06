@@ -18,6 +18,10 @@ export const Controller = (options?: string | ControllerOptions, responseType?: 
         else if (options && options.prefix) {
             url = options.prefix 
         }
+        Object.defineProperty(target, 'easy-ts-api-controller', {
+            value: true
+        })
+
         Object.defineProperty(target,'baseUrl', {
             value: url
         })
@@ -33,7 +37,7 @@ export const JsonController = (baseUrl?: string | ControllerOptions ) => {
 export const SocketController = (options?: string | SocketControllerOptions) => {
     return (target: Function) => {
         let namespace: string = '/';
-        let room: string = "socket.io";
+        let room: string | undefined;
         if (typeof options === 'string') {
             namespace = options
         }
@@ -53,7 +57,8 @@ export const SocketController = (options?: string | SocketControllerOptions) => 
 }
 
 
-export default class DefaultMiddleWare implements ExpressMiddleWare {
+
+export class DefaultMiddleWare implements ExpressMiddleWare {
     public use(req: Request, res: Response, next: NextFunction){
         console.log('Default middleware')
         next();

@@ -10,7 +10,7 @@ declare type SocketControllerOptions = {
 export declare const Controller: (options?: string | ControllerOptions | undefined, responseType?: string | undefined) => (target: Function) => void;
 export declare const JsonController: (baseUrl?: string | ControllerOptions | undefined) => (target: Function) => void;
 export declare const SocketController: (options?: string | SocketControllerOptions | undefined) => (target: Function) => void;
-export default class DefaultMiddleWare implements ExpressMiddleWare {
+export declare class DefaultMiddleWare implements ExpressMiddleWare {
     use(req: Request, res: Response, next: NextFunction): void;
 }
 export {};

@@ -1,6 +1,6 @@
 import { ParamsKey } from "..";
 
-export const OnMessage = (event?: string) => {
+export const OnEvent = (event?: string) => {
     return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
         let value: Function = descriptor.value
         if (target['events']) {
@@ -20,11 +20,11 @@ export const OnMessage = (event?: string) => {
 }
 
 export const OnConnect = () => {
-    return OnMessage('connection');
+    return OnEvent('connection');
 }
 
 export const OnDisconnect = () => {
-    return OnMessage('disconnect');
+    return OnEvent('disconnect');
 }
 
 
@@ -81,5 +81,7 @@ export const MessageBody = paramsFactory('data')
 export const ConnectedSocket = paramsFactory('socket')
 export const Clients = paramsFactory('clients')
 export const SocketId = paramsFactory('id')
-export const ConnectedIds = paramsFactory('ids')
+export const SocketQueryParam = paramsFactory('query')
+export const SocketHeaders = paramsFactory('headers')
+export const SocketAuth = paramsFactory('auth')
 

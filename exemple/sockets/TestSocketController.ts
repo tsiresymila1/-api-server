@@ -1,5 +1,6 @@
 
-import { ConnectedSocket, MessageBody, OnConnect, SocketController, OnMessage, OnDisconnect, EmitOnFail, EmitOnSuccess, SocketId } from "../../lib";
+import { ConnectedSocket, MessageBody, OnConnect, SocketController, OnEvent, OnDisconnect, EmitOnFail, EmitOnSuccess, SocketId, SocketAuth, SocketHeaders, SocketQueryParam } from "../../lib";
+
 @SocketController()
 export default class TestSocketController {
 
@@ -18,8 +19,10 @@ export default class TestSocketController {
 
     @EmitOnFail('error')
     @EmitOnSuccess('message')
-    @OnMessage('message')
-    public async message(@ConnectedSocket() socket, @MessageBody() data: any) {
+    @OnEvent('message')
+    public async message(@ConnectedSocket() socket, @MessageBody() data: any, @SocketAuth() auth, @SocketHeaders() Headers, @SocketQueryParam() query) {
+        console.log(auth, Headers, query);
         return data;
     }
 }
+

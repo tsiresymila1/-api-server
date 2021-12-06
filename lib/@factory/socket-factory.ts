@@ -26,6 +26,15 @@ const bindParams = (params: ParamsKey[], socket: Socket<DefaultEventsMap, Defaul
             case 'id':
                 param = socket.id
                 break;
+            case 'auth':
+                param = socket.handshake.auth
+                break;
+            case 'headers':
+                param = socket.handshake.headers
+                break;
+            case 'query':
+                param = socket.handshake.query
+                break;
         }
         // sey value assigne object
         let currentValue = value.value ? param[value.value] : param
@@ -39,12 +48,12 @@ export const registerSocket = async (io: Server, object: Function) => {
     let properties: string[] = Object.getOwnPropertyNames(object.prototype)
     let method: AsyncFunction;
     const namespace = Object.getOwnPropertyDescriptor(object, 'namespace')?.value
-    const room = Object.getOwnPropertyDescriptor(object, 'room')?.value ?? 'socket.io'
+    const room = Object.getOwnPropertyDescriptor(object, 'room')?.value
     if (properties.includes('connection')) {
         method = object.prototype['connection'];
     }
     io.of(namespace).on('connection', async (socket) => {
-        socket.join(room);
+        if (room) socket.join(room);
         if (method) {
             let paramsConnection: ParamsKey[] = object.prototype['params'] ? object.prototype['params']['connection'] ?? [] : []
             var typesConnection = Reflect.getMetadata("design:paramtypes", object.prototype, 'connection');

@@ -3,7 +3,7 @@ import { AppMiddleWare } from "../@types/index";
 import cookie from 'cookie';
 import { Express, Request } from 'express'
 import { AppRequest, AppResponse, RouteParams, ParamsKey, CookieType } from "../@types";
-import DefaultMiddleWare from '../@decorators/Controller';
+import { DefaultMiddleWare } from '../@decorators/Controller';
 import { CookieSerializeOptions } from 'cookie';
 import { pathToRegexp, compile, Key } from "path-to-regexp";
 import swagger from 'swagger-schema-official';
@@ -48,6 +48,7 @@ const bindParams = (params: null | ParamsKey[], req: AppRequest, res: AppRespons
 }
 
 export const registerController = async (app: FastifyInstance | Express, object: Function, isFastify: boolean, spec: swagger.Spec, cookieparams?: CookieSerializeOptions,): Promise<swagger.Spec> => {
+    if (!Object.getOwnPropertyDescriptors(object)['easy-ts-api-controller'].value) return spec;
     let baseUrl: string = Object.getOwnPropertyDescriptors(object)['baseUrl'].value
     let renderType: string = Object.getOwnPropertyDescriptors(object)['render'].value
     let properties: string[] = Object.getOwnPropertyNames(object.prototype)

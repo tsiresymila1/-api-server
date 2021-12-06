@@ -2,4 +2,4 @@ _bdd
 docker-*
 .env*
 Dockerfile
-lib/*
+lib/**/*.ts
