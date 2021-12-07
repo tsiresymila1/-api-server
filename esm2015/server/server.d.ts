@@ -1,7 +1,7 @@
 import { OpenAPiParams, ServerOption } from '../@types';
 import { Express } from 'express';
 import { FastifyInstance } from 'fastify';
-import { AppMiddleWare } from './../@types/index';
+import { AppMiddleware } from './../@types/index';
 import swagger from 'swagger-schema-official';
 import { Sequelize } from 'sequelize-typescript';
 export declare class App {
@@ -11,7 +11,7 @@ export declare class App {
     isfastify?: boolean;
     db: Sequelize;
     middlewares: {
-        [key: string]: (new () => AppMiddleWare)[];
+        [key: string]: (new () => AppMiddleware)[];
     };
     spec: swagger.Spec;
     constructor();
@@ -21,9 +21,9 @@ export declare class App {
     setup(): Promise<void>;
     configMulter(): Promise<void>;
     setMiddlewares(middlewares: {
-        '/': (new () => AppMiddleWare)[];
+        '/': (new () => AppMiddleware)[];
     }): void;
-    use(middleware: (new () => AppMiddleWare) | String, callback: (new () => AppMiddleWare)): void;
+    use(middleware: (new () => AppMiddleware) | String, callback: (new () => AppMiddleware)): void;
     configOpenAPi(openapiOptions: OpenAPiParams): void;
     configOpenApiMiddleware(): Promise<void>;
 }

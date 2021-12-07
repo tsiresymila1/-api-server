@@ -1,6 +1,10 @@
 
-import { ConnectedSocket, MessageBody, OnConnect, SocketController, OnEvent, OnDisconnect, EmitOnFail, EmitOnSuccess, SocketId, SocketAuth, SocketHeaders, SocketQueryParam } from "../../lib";
 
+import { ConnectedSocket, MessageBody, OnConnect, SocketController, OnEvent, OnDisconnect, EmitOnFail, EmitOnSuccess, SocketId, SocketAuth, SocketHeaders, SocketQueryParam, UseOnSocket } from "../../lib";
+import TestMethodSocketMiddleware from "./TestMethodSocketMiddleware";
+import TestSocketMiddleware from "./TestSocketMiddleware";
+
+@UseOnSocket(TestSocketMiddleware)
 @SocketController()
 export default class TestSocketController {
 
@@ -17,6 +21,7 @@ export default class TestSocketController {
         console.log(socket.id)
     }
 
+    @UseOnSocket(TestMethodSocketMiddleware)
     @EmitOnFail('error')
     @EmitOnSuccess('message')
     @OnEvent('message')

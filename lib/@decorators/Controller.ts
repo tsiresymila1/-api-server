@@ -18,7 +18,7 @@ export const Controller = (options?: string | ControllerOptions, responseType?: 
         else if (options && options.prefix) {
             url = options.prefix 
         }
-        Object.defineProperty(target, 'easy-ts-api-controller', {
+        Object.defineProperty(target, 'easy-ts-api:controller', {
             value: true
         })
 
@@ -30,6 +30,7 @@ export const Controller = (options?: string | ControllerOptions, responseType?: 
         })
     }
 }
+
 export const JsonController = (baseUrl?: string | ControllerOptions ) => {
     return Controller(baseUrl, 'application/json')
 }
@@ -57,7 +58,21 @@ export const SocketController = (options?: string | SocketControllerOptions) => 
 }
 
 
+export const Middleware = () => {
+    return (target: Function) => {
+        Object.defineProperty(target, 'easy-ts-api:middleware', {
+            value: true
+        })
+    }
+}
 
+export const SocketMiddleware = () => {
+    return (target: Function) => {
+        Object.defineProperty(target, 'easy-ts-api:socket-middleware', {
+            value: true
+        })
+    }
+}
 export class DefaultMiddleWare implements ExpressMiddleWare {
     public use(req: Request, res: Response, next: NextFunction){
         console.log('Default middleware')

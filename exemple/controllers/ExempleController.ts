@@ -1,15 +1,15 @@
 
-import { AppResponse, SocketIO } from "../../lib";
-import { All, Body, Get, Middleware, OpenApi, Post } from "../../lib"
-import { AppRequest, CookieType } from "../../lib"
-import { Params, Req, Res, Query, Headers, Ip, Session, Cookies } from "../../lib";
+import { SocketIO, Use } from "../../lib";
+import { Get, OpenApi, Post } from "../../lib"
+import { Params, Headers, } from "../../lib";
 import { Controller } from "../../lib";
+import InjectClassMiddleWare from "../middlewares/InjectClassMiddleware";
 import InjectMiddleWare from "../middlewares/InjectMiddleware";
-import User from './../models/UserModel';
+
 import { Hash } from './../../lib/providers/hash';
-import { RegisterInput } from "../schema/register";
 
 
+@Use(InjectClassMiddleWare)
 @Controller({ prefix: '/api' })
 export default class ExempleController {
 
@@ -45,7 +45,7 @@ export default class ExempleController {
             }
         }
     })
-    @Middleware(InjectMiddleWare)
+    @Use(InjectMiddleWare)
     @Post('/register')
     public async register(@SocketIO() socket: any) {
         console.log(socket)

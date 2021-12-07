@@ -2,6 +2,7 @@
 import { Server, Socket } from 'socket.io';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { ParamsKey } from '..';
+import { AppSocketMiddleware } from './../@types/index';
 
 type AsyncFunction = (...args: any) => Promise<any>
 
@@ -49,6 +50,8 @@ export const registerSocket = async (io: Server, object: Function) => {
     let method: AsyncFunction;
     const namespace = Object.getOwnPropertyDescriptor(object, 'namespace')?.value
     const room = Object.getOwnPropertyDescriptor(object, 'room')?.value
+    let classmiddlewares: Function[] = (object as any)['classmiddlewares'] ?? []
+    let objectMiddlewares: any = object.prototype['middlewares'];
     if (properties.includes('connection')) {
         method = object.prototype['connection'];
     }
@@ -65,9 +68,7 @@ export const registerSocket = async (io: Server, object: Function) => {
             const bindedParams = bindParams(paramsConnection, socket, "user connected", io)
             await method(...bindedParams)
         }
-        socket.use(([event, ...args], next) => {
-            next();
-        });
+
         for (let p of properties) {
             let callback: AsyncFunction = object.prototype[p];
             if (typeof method === 'function' && p !== 'constructor') {
@@ -80,6 +81,13 @@ export const registerSocket = async (io: Server, object: Function) => {
                     prev.push(next)
                     return prev;
                 }, [])
+                let defaultMiddlewares = objectMiddlewares ? objectMiddlewares[p] ?? [] : [];
+                let socketmiddlewares = Array().concat(classmiddlewares, defaultMiddlewares);
+                for (let m of socketmiddlewares) {
+                    if (!Object.getOwnPropertyDescriptors(m)['easy-ts-api:socket-middleware']) return;
+                    if (m.prototype) socket.use(m.prototype.use)
+
+                }
                 // register all socket 
                 socket.on(`${event}`, async (data: any) => {
                     const bindedParams = bindParams(params, socket, data, io)

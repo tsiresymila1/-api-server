@@ -4,7 +4,7 @@ import cookieSession from 'cookie-session'
 import { OpenAPiParams, ServerOption } from '../@types';
 import { Express } from 'express';
 import { FastifyInstance } from 'fastify';
-import { AppMiddleWare } from './../@types/index';
+import { AppMiddleware } from './../@types/index';
 import multer, { Multer } from 'multer';
 import path from 'path';
 import glob from 'glob';
@@ -23,7 +23,7 @@ export class App {
     app: Express | FastifyInstance | undefined
     isfastify?: boolean
     db: Sequelize
-    middlewares: { [key: string]: (new () => AppMiddleWare)[] } = { "/": [] };
+    middlewares: { [key: string]: (new () => AppMiddleware)[] } = { "/": [] };
     spec: swagger.Spec = {
         swagger: '2.0',
         info: {
@@ -80,7 +80,7 @@ export class App {
     public async setup() {
         // load middlewares 
         if (this.options && Array.isArray(this.options.middlewares) && this.options.middlewares.length > 0 && (this.options.middlewares as any[]).every(t => typeof t === "string")) {
-            (this.options.middlewares as String[]).push('!**/Inject*')
+            // (this.options.middlewares as String[]).push('!**/Inject*')
             const middlewaresFind = (this.options.middlewares as String[])?.reduce((p, n) => {
                 const s = String(n) + String(ENV.Get('EXTENSION') ?? '.ts')
                 p.push(s)
@@ -88,12 +88,12 @@ export class App {
             }, [] as string[]) ?? []
             let middlewares = globule.find(middlewaresFind)
             for (let mwr of middlewares) {
-                let middlewareFunction = require(mwr).default as (new () => AppMiddleWare);
+                let middlewareFunction = require(mwr).default as (new () => AppMiddleware);
                 this.middlewares['/'].push(middlewareFunction)
             }
         }
         else if (this.options) {
-            this.middlewares['/'].concat(this.options.middlewares as (new () => AppMiddleWare)[])
+            this.middlewares['/'].concat(this.options.middlewares as (new () => AppMiddleware)[])
         }
         // config middlewares 
         for (let key of Object.keys(this.middlewares) || []) {
@@ -154,11 +154,11 @@ export class App {
         }
     }
 
-    public setMiddlewares(middlewares: { '/': (new () => AppMiddleWare)[] }) {
+    public setMiddlewares(middlewares: { '/': (new () => AppMiddleware)[] }) {
         this.middlewares = middlewares;
     }
 
-    public use(middleware: (new () => AppMiddleWare) | String, callback: (new () => AppMiddleWare)) {
+    public use(middleware: (new () => AppMiddleware) | String, callback: (new () => AppMiddleware)) {
         if (middleware instanceof String) {
             this.middlewares[String(middleware)].push(callback)
         }

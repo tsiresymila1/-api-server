@@ -85,3 +85,28 @@ export const SocketQueryParam = paramsFactory('query')
 export const SocketHeaders = paramsFactory('headers')
 export const SocketAuth = paramsFactory('auth')
 
+
+// Middleware
+
+export const UseOnSocket = (middleware: Function) => {
+    return (target: any, propertyKey?: string, descriptor?: PropertyDescriptor) => {
+        if (!target['middlewares']) {
+            target['middlewares'] = {}
+        }
+        if (!target['classmiddlewares']) {
+            target['classmiddlewares'] = []
+        }
+        if (propertyKey) {
+            if (!target['middlewares'][propertyKey]) {
+                target['middlewares'][propertyKey] = []
+            }
+            target['middlewares'][propertyKey].push(middleware)
+        }
+        else {
+            target['classmiddlewares'].push(middleware)
+        }
+        return target;
+    }
+
+}
+

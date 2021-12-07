@@ -4,7 +4,7 @@ import multer from "multer"
 import {OptionsJson,OptionsUrlencoded} from "body-parser"
 import { CookieSerializeOptions } from "cookie"
 import swagger from 'swagger-schema-official';
-import { Model, ModelCtor } from "sequelize-typescript"
+import { Model, ModelCtor } from "sequelize-typescript";
 type ControllerOptions = {
     url?: string
 }
@@ -58,8 +58,12 @@ export interface  ServerOption {
      url?: string
  }
 
-export class AppMiddleWare {
+export class AppMiddleware {
     use: ((req: Request, res: Response, next: NextFunction) => void) | undefined;
+}
+
+export interface AppSocketMiddleware {
+    use: (socket: any, next: ((err?: any) => any)) => void
 }
 
 

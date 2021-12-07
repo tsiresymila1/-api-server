@@ -1,9 +1,8 @@
 import { FastifyInstance, FastifyRequest } from "fastify";
-import { AppMiddleWare } from "../@types/index";
+import { AppMiddleware } from "../@types/index";
 import cookie from 'cookie';
 import { Express, Request } from 'express'
 import { AppRequest, AppResponse, RouteParams, ParamsKey, CookieType } from "../@types";
-import { DefaultMiddleWare } from '../@decorators/Controller';
 import { CookieSerializeOptions } from 'cookie';
 import { pathToRegexp, compile, Key } from "path-to-regexp";
 import swagger from 'swagger-schema-official';
@@ -11,7 +10,7 @@ import { App } from '../server/server';
 
 const bindParams = (params: null | ParamsKey[], req: AppRequest, res: AppResponse, isFastify: boolean, cookieparams?: CookieSerializeOptions, app?: FastifyInstance | Express): any[] => {
     let methodParams: any[] = []
-    params?.forEach((value: ParamsKey, index) => {
+    params?.forEach((value: ParamsKey) => {
         let param: any;
         switch (value.param) {
             case 'io':
@@ -41,17 +40,19 @@ const bindParams = (params: null | ParamsKey[], req: AppRequest, res: AppRespons
         }
         // sey value assigne object
         let currentValue = value.value ? param[value.value] : param
-        if (value.type) Object.assign(currentValue, value.type)
+        if (currentValue && value.type) Object.assign(currentValue, value.type)
         methodParams.push(currentValue)
     });
     return methodParams;
 }
 
 export const registerController = async (app: FastifyInstance | Express, object: Function, isFastify: boolean, spec: swagger.Spec, cookieparams?: CookieSerializeOptions,): Promise<swagger.Spec> => {
-    if (!Object.getOwnPropertyDescriptors(object)['easy-ts-api-controller'].value) return spec;
+    if (!Object.getOwnPropertyDescriptors(object)['easy-ts-api:controller']) return spec;
     let baseUrl: string = Object.getOwnPropertyDescriptors(object)['baseUrl'].value
     let renderType: string = Object.getOwnPropertyDescriptors(object)['render'].value
     let properties: string[] = Object.getOwnPropertyNames(object.prototype)
+    let classmiddlewares: Function[] = (object as any)['classmiddlewares'] ?? []
+    let objectMiddlewares: any = object.prototype['middlewares'];
     for (let a of properties) {
         let method: Function = object.prototype[a];
         if (typeof method === 'function' && a !== 'constructor') {
@@ -64,9 +65,12 @@ export const registerController = async (app: FastifyInstance | Express, object:
                 prev.push(next)
                 return prev;
             }, [])
-            let middlewares: Function[] = object.prototype['middlewares'] ? object.prototype['middlewares'][a] ?? [DefaultMiddleWare] : [DefaultMiddleWare]
-            let uses: Function[] = middlewares.reduce<any[]>((p, n) => {
-                p.push(n.prototype.use)
+            let middlewares: Function[] = objectMiddlewares ? objectMiddlewares[a] ?? [classmiddlewares] : [classmiddlewares]
+            middlewares = Array().concat(classmiddlewares, middlewares)
+            let uses: Function[] = middlewares.reduce<Function[]>((p, n) => {
+                if (n && n.prototype) {
+                    p.push(n.prototype.use)
+                }
                 return p
             }, [])
             let applymiddleware: Function[] | { preHandler: Function[] } = isFastify ? { preHandler: uses } : uses
@@ -158,7 +162,9 @@ export const registerController = async (app: FastifyInstance | Express, object:
 }
 
 
-export const registerMiddleware = async (app: App, object: AppMiddleWare, route = "/") => {
+export const registerMiddleware = async (app: App, object: AppMiddleware, route = "/") => {
+    const propertiesDescriptors = Object.getOwnPropertyDescriptors(object.constructor)
+    if (!propertiesDescriptors['easy-ts-api:middleware']) return;
     (app.app as any)['use'](route, object.use)
 
 }

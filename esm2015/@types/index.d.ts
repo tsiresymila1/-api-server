@@ -44,6 +44,9 @@ export declare type OpenAPiParams = {
     options: swagger.Info;
     url?: string;
 };
-export declare class AppMiddleWare {
+export declare class AppMiddleware {
     use: ((req: Request, res: Response, next: NextFunction) => void) | undefined;
+}
+export interface AppSocketMiddleware {
+    use: (socket: any, next: ((err?: any) => any)) => void;
 }

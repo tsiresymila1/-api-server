@@ -48,7 +48,7 @@ import {serverOption} from './config/app.ts'
 
 // Express inntance
 async function bootstrap() {
-    const app: App = await AppFactory.create<ExpressApplication>(ExpressApplication, serverOption); /// .create<FastifyApplication>(AppServer)
+    const app: App = await AppFactory.create<ExpressApplication>(ExpressApplication, serverOption); 
     await app.serve(3000, (port) => {
         console.log(`Instance of express server running on port ${port}`)
     });
@@ -61,7 +61,7 @@ bootstrap()
 ## Controller 
 There is an exemple of controller with opeapi 
 ```ts
-import { All, Get, Middleware, OpenApi } from "easy-ts-api"
+import { All, Get,Use , OpenApi } from "easy-ts-api"
 import { AppRequest, CookieType, AppResponse } from "easy-ts-api"
 import { Params, Req, Res, Query, Headers, Ip, Session, Cookies } from "easy-ts-api";
 import { Controller } from "easy-ts-api";
@@ -102,7 +102,7 @@ export default class ExempleController {
             }
         }
     })
-    @Middleware(InjectMiddleWare) // can inject middleware for only some method
+    @Use(InjectMiddleWare) // can inject middleware for only some method
     @All('/register')
     public async register(@Req() req: AppRequest, @Res() res: AppResponse, @Query() query: any, @Headers() headers: any, @Ip() ip: string, @Session() session: any, @Cookies() cookies: CookieType) {
         cookies.set('name', 'cookies test') // setting cookie 
@@ -124,8 +124,9 @@ Middleware is based on express middleware but it can work perfectly with fastify
 
 ```ts
 import { NextFunction,Request,Response } from 'express';
-import { AppMiddleWare } from 'easy-ts-api';
+import { AppMiddleWare,Middleware } from 'easy-ts-api';
 
+@Middleware()
 export default class ExempleMiddleWare implements AppMiddleWare {
 
     public use(req: Request, res: Response, next: NextFunction){
@@ -135,7 +136,23 @@ export default class ExempleMiddleWare implements AppMiddleWare {
 }
 
 ```
+If you want to create InjectMiddleware, you dont need to use decorator @Middleware() to create it.<br> 
+Inject middleware can inject by decorate class or decorate method.<br>
+@Middleware() tell us that this middlewars will be used globaly. 
 
+```ts
+import { NextFunction,Request,Response } from 'express';
+import { AppMiddleWare,Middleware } from 'easy-ts-api';
+
+export default class InjectMiddleWare implements AppMiddleWare {
+
+    public use(req: Request, res: Response, next: NextFunction){
+        console.log('Called inject middleware')
+        next();
+    }
+}
+
+```
 For database create  .env file and specify some parameters
 
 ```
@@ -187,14 +204,14 @@ export default class RegisterInput {
 }
 
 ```
-if you want to use socket io with , enable ity in serveroption 
+if you want to use socket io with , enable it in serveroption 
 
 ```ts
 export const serverOption: ServerOption = {
     controllers: [path.join(__dirname, '..', '/controllers/**/*Controller')],
     middlewares: [path.join(__dirname, '..', '/middlewares/**/*Middleware')],
     models: [path.join(__dirname, '..', '/models/**/*Model.ts')],
-    sockets: [path.join(__dirname, '..', '/sockets/**/*SocketController')],
+    sockets: [path.join(__dirname, '..', '/sockets/**/*SocketController')], // socket controller
     cors: true,
     enableSocketIo: true
 }
@@ -205,8 +222,11 @@ and Create socket controller
 ```ts
 
 import { ConnectedSocket, MessageBody, OnConnection, SocketController } from "easy-ts-api";
-import { OnMessage } from 'easy-ts-api';
+import { OnEvent,EmitOnSuccess,EmitOnFail,UseOnSocket } from 'easy-ts-api';
+import TestMethodSocketMiddleware from './TestMethodSocketMiddleware'
+import TestSocketMiddleware from "./TestSocketMiddleware";
 
+@UseOnSocket(TestSocketMiddleware)
 @SocketController()
 export default class TestSocketController {
 
@@ -216,14 +236,32 @@ export default class TestSocketController {
         console.log(socket.id)
     }
 
-    @OnMessage('message')
+    @UseOnSocket(TestMethodSocketMiddleware)
+    @EmitOnFail('error')
+    @EmitOnSuccess('message')
+    @OnEvent('message')
     public async message(@ConnectedSocket() socket, @MessageBody() data: any) {
         console.log('Message get : ', data, socket)
         socket.emit('message', 'got data : ' + data);
     }
 }
 ```
+And socket middleware must be like 
 
+```ts
+import { AppSocketMiddleware, SocketMiddleware } from 'easy-ts-api';
+
+@SocketMiddleware()
+export default class TestMethodSocketMiddleware implements AppSocketMiddleware {
+    use(socket: any, next: ((err?: any) => any)) {
+        console.log("do something, for example get authorization token and check authorization");
+        next();
+    }
+
+}
+
+```
+You maste use decorator @SocketMiddleware() to tell that it is a socket decorator and not any class. It will be ignore without this decorator.
 After, you can able to get SokcetIO from controller method params
 
 ```ts

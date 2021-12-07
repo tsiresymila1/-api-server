@@ -27,15 +27,23 @@ const methodFactory = (method: string)=>{
     }
 }
 
-export const Middleware = (middleware: Function) => {
-    return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-        if(!target['middlewares']){
-            target['middlewares'] = {} 
+export const Use = (middleware: Function) => {
+    return (target: any, propertyKey?: string, descriptor?: PropertyDescriptor) => {
+        if (!target['middlewares']) {
+            target['middlewares'] = {}
         }
-        if (!target['middlewares'][propertyKey]) {
-            target['middlewares'][propertyKey] = []
+        if (!target['classmiddlewares']) {
+            target['classmiddlewares'] = []
         }
-        target['middlewares'][propertyKey].push(middleware)
+        if (propertyKey) {
+            if (!target['middlewares'][propertyKey]) {
+                target['middlewares'][propertyKey] = []
+            }
+            target['middlewares'][propertyKey].push(middleware)
+        }
+        else {
+            target['classmiddlewares'].push(middleware)
+        }
         return target;
     }
     

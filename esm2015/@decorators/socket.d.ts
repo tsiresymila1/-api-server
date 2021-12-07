@@ -10,3 +10,4 @@ export declare const SocketId: (key?: string | undefined) => (target: any, prope
 export declare const SocketQueryParam: (key?: string | undefined) => (target: any, propertyKey: string, parameterIndex: number) => any;
 export declare const SocketHeaders: (key?: string | undefined) => (target: any, propertyKey: string, parameterIndex: number) => any;
 export declare const SocketAuth: (key?: string | undefined) => (target: any, propertyKey: string, parameterIndex: number) => any;
+export declare const UseOnSocket: (middleware: Function) => (target: any, propertyKey?: string | undefined, descriptor?: PropertyDescriptor | undefined) => any;
