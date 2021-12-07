@@ -1,5 +1,5 @@
 import { NextFunction,Request,Response } from 'express';
-import { ExpressMiddleWare, Middleware } from '../../lib';
+import { ExpressMiddleWare, Middleware } from '../../esm2015';
 
 // @Middleware()
 export default class InjectMiddleWare implements ExpressMiddleWare {

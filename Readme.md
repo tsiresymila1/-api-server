@@ -1,6 +1,6 @@
-# API SERVER 
+# EASY API SERVER 
 
-API SERVER is an ts module that have for goal to create MVC pattern with express or fastify and auto configure swagger interface to manipulate the api 
+EASY API SERVER is an ts module that have for goal to create MVC pattern with express or fastify and auto configure swagger interface to manipulate the api 
 
 *Installing* 
 
@@ -59,7 +59,7 @@ bootstrap()
 ```
 
 ## Controller 
-There is an exemple of controller with opeapi 
+There is an exemple of controller with openapi 
 ```ts
 import { All, Get,Use , OpenApi } from "easy-ts-api"
 import { AppRequest, CookieType, AppResponse } from "easy-ts-api"
@@ -137,14 +137,14 @@ export default class ExempleMiddleWare implements AppMiddleWare {
 
 ```
 If you want to create InjectMiddleware, you dont need to use decorator @Middleware() to create it.<br> 
-Inject middleware can inject by decorate class or decorate method.<br>
-@Middleware() tell us that this middlewars will be used globaly. 
+Inject middleware can be injected by decorate class or decorate method.<br>
+@Middleware() tell server that this middleware will be used globaly. 
 
 ```ts
 import { NextFunction,Request,Response } from 'express';
 import { AppMiddleWare,Middleware } from 'easy-ts-api';
 
-export default class InjectMiddleWare implements AppMiddleWare {
+export default class InjectMiddleWare implements AppMiddleware {
 
     public use(req: Request, res: Response, next: NextFunction){
         console.log('Called inject middleware')
@@ -221,7 +221,7 @@ and Create socket controller
 
 ```ts
 
-import { ConnectedSocket, MessageBody, OnConnection, SocketController } from "easy-ts-api";
+import { ConnectedSocket, MessageBody, OnConnect, SocketController } from "easy-ts-api";
 import { OnEvent,EmitOnSuccess,EmitOnFail,UseOnSocket } from 'easy-ts-api';
 import TestMethodSocketMiddleware from './TestMethodSocketMiddleware'
 import TestSocketMiddleware from "./TestSocketMiddleware";
@@ -230,7 +230,7 @@ import TestSocketMiddleware from "./TestSocketMiddleware";
 @SocketController()
 export default class TestSocketController {
 
-    @OnConnection()
+    @OnConnect()
     public async connection(@ConnectedSocket() socket) {
         console.log('user connected')
         console.log(socket.id)
@@ -241,8 +241,8 @@ export default class TestSocketController {
     @EmitOnSuccess('message')
     @OnEvent('message')
     public async message(@ConnectedSocket() socket, @MessageBody() data: any) {
-        console.log('Message get : ', data, socket)
-        socket.emit('message', 'got data : ' + data);
+        console.log('Message get from zvznr message : ', data, socket)
+        return data;
     }
 }
 ```
@@ -261,8 +261,8 @@ export default class TestMethodSocketMiddleware implements AppSocketMiddleware {
 }
 
 ```
-You maste use decorator @SocketMiddleware() to tell that it is a socket decorator and not any class. It will be ignore without this decorator.
-After, you can able to get SokcetIO from controller method params
+You must use decorator middleware with @SocketMiddleware() to know that it is a socket decorator and not any class. It will be ignore without this decorator.<br>
+After all, you can able to SocketIO from controller method parameter
 
 ```ts
 

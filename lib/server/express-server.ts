@@ -25,7 +25,7 @@ export class ExpressApplication extends App {
             this.server = http.createServer(this.app)
             this.app.set('io', new Server(this.server, {
                 cors: {
-                    origin: "http://localhost:3000",
+                    origin: "*",
                     credentials: true
                 }
             }));

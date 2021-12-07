@@ -1,5 +1,5 @@
 import { AutoIncrement, Column, Model, PrimaryKey, Table } from "sequelize-typescript";
-import { prop, Schema } from './../../lib';
+import { prop, Schema } from './../../esm2015';
 
 @Table({
     timestamps: true,

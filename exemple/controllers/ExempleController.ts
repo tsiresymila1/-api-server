@@ -1,12 +1,12 @@
 
-import { SocketIO, Use } from "../../lib";
-import { Get, OpenApi, Post } from "../../lib"
-import { Params, Headers, } from "../../lib";
-import { Controller } from "../../lib";
+import { SocketIO, Use } from "../../esm2015";
+import { Get, OpenApi, Post } from "../../esm2015"
+import { Params, Headers, } from "../../esm2015";
+import { Controller } from "../../esm2015";
 import InjectClassMiddleWare from "../middlewares/InjectClassMiddleware";
 import InjectMiddleWare from "../middlewares/InjectMiddleware";
 
-import { Hash } from './../../lib/providers/hash';
+import { Hash } from './../../esm2015/providers/hash';
 
 
 @Use(InjectClassMiddleWare)

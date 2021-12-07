@@ -1,6 +1,6 @@
 {
     "name": "easy-ts-api",
-    "version": "1.0.7",
+    "version": "1.0.7-a",
     "description": "Api Server with open api interface",
     "main": "esm2015/index.js",
     "module": "esm2015/index.js",
@@ -30,7 +30,11 @@
         "json",
         "reflect",
         "service",
-        "microservice"
+        "microservice",
+        "socket",
+        "socket.io",
+        "websocket",
+        "pooling"
     ],
     "author": "Tsiresy Milà",
     "license": "ISC",
