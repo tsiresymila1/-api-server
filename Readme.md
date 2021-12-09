@@ -194,13 +194,19 @@ You can transform Model or any class to body schema
 import { prop, Schema } from 'easy-ts-api';
 
 @Schema()
-export default class RegisterInput {
-
+export class RegisterInput {
+    @maxlength(20) //validator
     @prop()
-    email: string;
+    name: string
 
+    @isemail() // validator
     @prop()
-    password: string;
+    email: string
+
+    @hash() // hash password on set sha256 crypto-js
+    @minlength(8) // validator
+    @prop()
+    password: string
 }
 
 ```
@@ -276,9 +282,18 @@ After all, you can able to SocketIO from controller method parameter
         }
     })
     @Middleware(InjectMiddleWare) 
-    @All('/register')
-    public async register(@SocketIO() socket: Server) {
-        console.log(socket)
+    @Post('/register')
+    public async register(@SocketIO() socket: any, @Body() body: RegisterInput) {
+        /**
+         *  // checking body if validates and will return ,
+         * {
+         *      isvalid: boolean,
+         *      messages: {}
+         * }
+        */
+        const validators = Validator.validate(body)
+        
+        console.log(body.password, validators)
         return {
             name: 'register',
         }
@@ -286,6 +301,27 @@ After all, you can able to SocketIO from controller method parameter
 
 ...
 
+```
+
+### Other config
+
+You can config openapi and database with
+
+```ts
+...
+app.configOpenAPi({
+    url: '/api/docs', // url to access the api docs
+    options: { // swagger infos option
+        version: '1.0',
+    }
+} as OpenAPiParams)
+...
+
+app.configDatabaseOption({
+    force: true, // sequelize options
+    alter: true
+})
+...
 ```
 ### Tsiresy Milà
 #### tsiresymila@gmail.com

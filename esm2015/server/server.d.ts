@@ -4,12 +4,14 @@ import { FastifyInstance } from 'fastify';
 import { AppMiddleware } from './../@types/index';
 import swagger from 'swagger-schema-official';
 import { Sequelize } from 'sequelize-typescript';
+import { SyncOptions } from 'sequelize/types';
 export declare class App {
     options?: ServerOption;
     openapiOptions?: OpenAPiParams;
     app: Express | FastifyInstance | undefined;
     isfastify?: boolean;
     db: Sequelize;
+    syncOption?: SyncOptions | undefined;
     middlewares: {
         [key: string]: (new () => AppMiddleware)[];
     };
@@ -25,5 +27,6 @@ export declare class App {
     }): void;
     use(middleware: (new () => AppMiddleware) | String, callback: (new () => AppMiddleware)): void;
     configOpenAPi(openapiOptions: OpenAPiParams): void;
+    configDatabaseOption(options: SyncOptions): void;
     configOpenApiMiddleware(): Promise<void>;
 }

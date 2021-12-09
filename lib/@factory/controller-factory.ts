@@ -7,6 +7,7 @@ import { CookieSerializeOptions } from 'cookie';
 import { pathToRegexp, compile, Key } from "path-to-regexp";
 import swagger from 'swagger-schema-official';
 import { App } from '../server/server';
+import { plainToClass, plainToInstance } from 'class-transformer';
 
 const bindParams = (params: null | ParamsKey[], req: AppRequest, res: AppResponse, isFastify: boolean, cookieparams?: CookieSerializeOptions, app?: FastifyInstance | Express): any[] => {
     let methodParams: any[] = []
@@ -35,12 +36,24 @@ const bindParams = (params: null | ParamsKey[], req: AppRequest, res: AppRespons
                 }
                 param = data;
                 break;
+            case 'body':
+                param = (req as any)[value.param];
+                break;
             default:
-                param = isFastify ? (req as any).raw[value.param] : (req as any)[value.param];
+                const request: any = isFastify ? (req as FastifyRequest).raw : (req as Request)
+                param = request[value.param];
         }
         // sey value assigne object
         let currentValue = value.value ? param[value.value] : param
-        if (currentValue && value.type) Object.assign(currentValue, value.type)
+        if (currentValue && value.type && value.type != Object) {
+            try {
+                currentValue = plainToInstance(value.type, currentValue, { enableCircularCheck: true })
+            }
+            catch (e: any) {
+                console.log(e)
+            }
+
+        }
         methodParams.push(currentValue)
     });
     return methodParams;

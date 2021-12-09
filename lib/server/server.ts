@@ -15,6 +15,7 @@ import database from '../providers/database';
 import { ENV } from './../utils/env';
 import { registerSocket } from './../@factory/socket-factory';
 import { Server } from 'socket.io';
+import { SyncOptions } from 'sequelize/types';
 var globule = require('globule');
 
 export class App {
@@ -23,6 +24,7 @@ export class App {
     app: Express | FastifyInstance | undefined
     isfastify?: boolean
     db: Sequelize
+    syncOption?: SyncOptions | undefined
     middlewares: { [key: string]: (new () => AppMiddleware)[] } = { "/": [] };
     spec: swagger.Spec = {
         swagger: '2.0',
@@ -39,6 +41,7 @@ export class App {
     public setServerOption(options: ServerOption) {
         this.options = options;
     }
+
     public async serve(...args: any) {
         await this.config()
         // loads models 
@@ -53,7 +56,7 @@ export class App {
         else {
             this.db.addModels([path.join(process.cwd(), 'models/**/*Model') + String(ENV.Get('EXTENSION') ?? '.ts')]);
         }
-        await this.db.sync({ force: true, alter: true });
+        await this.db.sync(this.syncOption ? this.syncOption : { alter: false });
         //register db to request
         (this.app as any)['use']((req: any, res: any, next: () => void) => {
             req.db = this.db
@@ -177,6 +180,10 @@ export class App {
             },
             paths: {},
         }
+    }
+
+    public configDatabaseOption(options: SyncOptions) {
+        this.syncOption = options;
     }
 
     public async configOpenApiMiddleware() {

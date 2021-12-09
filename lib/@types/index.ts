@@ -5,8 +5,9 @@ import {OptionsJson,OptionsUrlencoded} from "body-parser"
 import { CookieSerializeOptions } from "cookie"
 import swagger from 'swagger-schema-official';
 import { Model, ModelCtor } from "sequelize-typescript";
-type ControllerOptions = {
-    url?: string
+export type ValidType = {
+    isvalid: boolean
+    messages: any
 }
 
 export  interface ExpressMiddleWare {

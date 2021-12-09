@@ -1,12 +1,14 @@
 
-import { SocketIO, Use } from "../../esm2015";
-import { Get, OpenApi, Post } from "../../esm2015"
-import { Params, Headers, } from "../../esm2015";
-import { Controller } from "../../esm2015";
+import { SocketIO, Use } from "../../lib";
+import { Get, OpenApi, Post } from "../../lib"
+import { Params, Headers, } from "../../lib";
+import { Controller } from "../../lib";
+import { Body, Validator } from "../../lib";
 import InjectClassMiddleWare from "../middlewares/InjectClassMiddleware";
 import InjectMiddleWare from "../middlewares/InjectMiddleware";
 
-import { Hash } from './../../esm2015/providers/hash';
+import { Hash } from '../../lib';
+import { RegisterInput } from './../schema/register';
 
 
 @Use(InjectClassMiddleWare)
@@ -47,8 +49,9 @@ export default class ExempleController {
     })
     @Use(InjectMiddleWare)
     @Post('/register')
-    public async register(@SocketIO() socket: any) {
-        console.log(socket)
+    public async register(@SocketIO() socket: any, @Body() body: RegisterInput) {
+        const validators = Validator.validate(body) // validate body 
+        console.log(body.password, validators)
         return {
             name: 'register',
         }

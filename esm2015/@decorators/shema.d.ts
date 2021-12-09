@@ -10,4 +10,29 @@ export declare function use(target: Function): {
     properties: [];
     required: string[];
 };
+export declare const check: (condition: (value: any, length: number) => boolean, message: string, options?: {
+    defaultlength: number;
+    key: string;
+}) => (length?: number, option?: {
+    message?: string | undefined;
+} | undefined) => (target: any, propertyKey: PropertyKey) => void;
+export declare const isemail: (length?: number, option?: {
+    message?: string | undefined;
+} | undefined) => (target: any, propertyKey: PropertyKey) => void;
+export declare const notzero: (length?: number, option?: {
+    message?: string | undefined;
+} | undefined) => (target: any, propertyKey: PropertyKey) => void;
+export declare const maxlength: (length?: number, option?: {
+    message?: string | undefined;
+} | undefined) => (target: any, propertyKey: PropertyKey) => void;
+export declare const minlength: (length?: number, option?: {
+    message?: string | undefined;
+} | undefined) => (target: any, propertyKey: PropertyKey) => void;
+export declare const ispositive: (length?: number, option?: {
+    message?: string | undefined;
+} | undefined) => (target: any, propertyKey: PropertyKey) => void;
+export declare const isnegative: (length?: number, option?: {
+    message?: string | undefined;
+} | undefined) => (target: any, propertyKey: PropertyKey) => void;
+export declare const hash: () => (target: any, propertyKey: PropertyKey) => void;
 export {};
