@@ -1,4 +1,4 @@
 import { ValidType } from "./../@types";
 export declare class Validator {
-    static validate(data: any): ValidType;
+    static check(data: any): ValidType;
 }

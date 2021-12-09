@@ -6,7 +6,7 @@ import { CookieSerializeOptions } from "cookie";
 import swagger from 'swagger-schema-official';
 import { Model, ModelCtor } from "sequelize-typescript";
 export declare type ValidType = {
-    isvalid: boolean;
+    isValid: boolean;
     messages: any;
 };
 export interface ExpressMiddleWare {

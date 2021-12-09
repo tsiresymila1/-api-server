@@ -28,6 +28,7 @@ export class FastifyApplication extends App {
             root: this.options?.staticFolder ?? path.join(__dirname, 'public'),
             prefix: this.options?.staticUrl ?? '/static',
         })
+        await this.app.register(require('fastify-multipart'))
         super.config();
     }
 

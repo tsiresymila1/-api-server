@@ -16,4 +16,7 @@ export class RegisterInput {
     @minlength(8)
     @prop()
     password: string
+
+    @prop({ type: 'file', format: 'binary', description: '', in: 'formData', name: 'profile' })
+    profile: any
 }

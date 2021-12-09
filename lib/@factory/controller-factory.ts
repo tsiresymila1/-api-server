@@ -7,7 +7,7 @@ import { CookieSerializeOptions } from 'cookie';
 import { pathToRegexp, compile, Key } from "path-to-regexp";
 import swagger from 'swagger-schema-official';
 import { App } from '../server/server';
-import { plainToClass, plainToInstance } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 
 const bindParams = (params: null | ParamsKey[], req: AppRequest, res: AppResponse, isFastify: boolean, cookieparams?: CookieSerializeOptions, app?: FastifyInstance | Express): any[] => {
     let methodParams: any[] = []
@@ -36,9 +36,14 @@ const bindParams = (params: null | ParamsKey[], req: AppRequest, res: AppRespons
                 }
                 param = data;
                 break;
-            case 'body':
-                param = (req as any)[value.param];
-                break;
+            case 'files':
+                const r: any = isFastify ? (req as FastifyRequest).raw : (req as Request)
+                param = r[value.param] as Array<{ fieldname: string }>;
+                param = param.reduce((p: any, n: { fieldname: string }) => {
+                    p[n.fieldname] = n;
+                    return p
+                }, {})
+                break
             default:
                 const request: any = isFastify ? (req as FastifyRequest).raw : (req as Request)
                 param = request[value.param];
@@ -115,21 +120,15 @@ export const registerController = async (app: FastifyInstance | Express, object:
                         spec.paths[swaggerRoute] = {}
                     }
                     let body = params.filter((e) => e.param === 'body')
-                    let requestBody: Object = {}
+                    path.produces = [
+                        "application/xml",
+                        "application/json"
+                    ]
+                    let jsonBody: Array<any> = [] 
                     for (let b of body) {
                         let t = Reflect.getMetadata('class:schema', b.type)
                         if (t) {
-                            requestBody =
-                            {
-                                name: 'body',
-                                in: 'body',
-                                required: true,
-                                description: 'Post data',
-                                schema: {
-                                    ...t,
-                                    $ref: ""
-                                }
-                            }
+                            jsonBody = Object.values(t.properties) 
                             break;
                         }
                     }
@@ -137,16 +136,16 @@ export const registerController = async (app: FastifyInstance | Express, object:
                         spec.paths[swaggerRoute]['get'] = path
                         spec.paths[swaggerRoute]['put'] = path
                         spec.paths[swaggerRoute]['delete'] = path
-                        path["consumes"] = ["application/json"];
-                        if (Object.keys(requestBody).length > 0) {
-                            path.parameters.push(requestBody)
+                        path["consumes"] = ["multipart/form-data"]
+                        if (Object.keys(jsonBody).length > 0) {
+                            path.parameters = path.parameters.concat(jsonBody)
                         }
                         spec.paths[swaggerRoute]['post'] = path
                     }
                     else if (route.method === 'post') {
-                        path["consumes"] = ["application/json"];
-                        if (Object.keys(requestBody).length > 0) {
-                            path.parameters.push(requestBody)
+                        path["consumes"] = ["multipart/form-data"]
+                        if (Object.keys(jsonBody).length > 0) {
+                            path.parameters = path.parameters.concat(jsonBody)
                         }
                         spec.paths[swaggerRoute][route.method] = path
                     }
@@ -164,8 +163,8 @@ export const registerController = async (app: FastifyInstance | Express, object:
                         res.header('Content-type', renderType);
                     }
                     res.send(data)
-                }).catch((err: any) => {
-                    res.send({ error: err }).status(500)
+                }).catch((err: { message: string, stack: string } | any) => {
+                    res.send({ error: err.message ?? err }).status(500)
                 });
 
             })

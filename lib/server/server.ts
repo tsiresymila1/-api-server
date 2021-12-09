@@ -27,11 +27,12 @@ export class App {
     syncOption?: SyncOptions | undefined
     middlewares: { [key: string]: (new () => AppMiddleware)[] } = { "/": [] };
     spec: swagger.Spec = {
-        swagger: '2.0',
+        swagger: '2.0', 
         info: {
             title: 'API SERVER ',
-            version: '1.0.0'
+            version: '1.0.0',
         },
+        schemes: ["http", "https"],
         paths: {},
     };
 
@@ -140,12 +141,13 @@ export class App {
 
     public async configMulter() {
         const storage = multer.diskStorage({
-            destination: function (req, file, cb) {
-                cb(null, path.join(process.cwd(), 'public/uploads/'))
+            destination: (req, file, cb) => {
+                cb(null, path.join(process.cwd(), String(this.options?.staticFolder ?? 'public') + '/uploads/'))
             },
-            filename: function (req, file, cb) {
-                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-                cb(null, file.fieldname + '-' + uniqueSuffix)
+            filename: (req, file, cb) => {
+                let ext = file.originalname.substring(file.originalname.lastIndexOf('.'), file.originalname.length);
+                const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1E9) + ext
+                cb(null, file.fieldname + '_' + uniqueSuffix)
             }
         })
         const upload: Multer = multer(this.options && this.options.uploadOption ? this.options.uploadOption : { storage: storage })
@@ -173,10 +175,10 @@ export class App {
     public configOpenAPi(openapiOptions: OpenAPiParams) {
         this.openapiOptions = openapiOptions
         this.spec = {
-            swagger: '2.0',
+            swagger: '2.0.0',
             info: this.openapiOptions ? this.openapiOptions.options : {
                 title: 'API SERVER ',
-                version: '1.0.0'
+                version: '3.0.0'
             },
             paths: {},
         }

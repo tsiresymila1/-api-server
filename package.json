@@ -1,6 +1,6 @@
 {
     "name": "easy-ts-api",
-    "version": "1.0.9",
+    "version": "1.0.9-c",
     "description": "Api Server with open api interface",
     "main": "esm2015/index.js",
     "module": "esm2015/index.js",
@@ -62,6 +62,7 @@
         "fastify": "^3.23.0",
         "fastify-cookie": "^5.3.2",
         "fastify-express": "^0.3.3",
+        "fastify-multipart": "^5.2.1",
         "fastify-socket.io": "^3.0.0",
         "fastify-static": "^4.5.0",
         "fastify-swagger": "^4.12.6",

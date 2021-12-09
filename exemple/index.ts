@@ -6,7 +6,18 @@ import { serverOption } from './config/app';
 
 // Express intance
 // async function bootstrap() {
-//     const app: App = await AppFactory.create(ExpressApplication, serverOption); /// .create<FastifyApplication>(AppServer)
+//     const app: App = await AppFactory.create(ExpressApplication, serverOption);
+//     // app.configOpenAPi({
+//     //     url: '/api/docs',
+//     //     options: {
+//     //         version: '3.0.0',
+//     //         title: 'Test API'
+//     //     }
+//     // } as OpenAPiParams)
+//     app.configDatabaseOption({
+//         force: true,
+//         alter: true
+//     })
 //     await app.serve(3000, (port) => {
 //         console.log(`Instance of express server running on port ${port}`)
 //     });
@@ -20,7 +31,8 @@ async function bootstrap() {
     app.configOpenAPi({
         url: '/api/docs',
         options: {
-            version: '1.0',
+            version: '1.0.0',
+            title: 'Test API'
         }
     } as OpenAPiParams)
     app.configDatabaseOption({

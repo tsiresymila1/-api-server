@@ -1,7 +1,7 @@
 import express, { Express } from "express";
 import { ServerOption } from "../@types";
 import path from 'path';
-import { json, urlencoded } from 'body-parser';
+import { json, raw, urlencoded } from 'body-parser';
 import cookieParser from 'cookie-parser'
 import cookieSession from 'cookie-session'
 import { App } from "./server";
@@ -31,7 +31,7 @@ export class ExpressApplication extends App {
             }));
         }
         super.config();
-        this.app.use(json(this.options?.json ?? { limit: '50mb' }))
+        this.app.use(raw(this.options?.json ?? { limit: '50mb' }))
         this.app.use(urlencoded(this.options?.urlencoded ?? { extended: true }));
         this.app.use(cookieParser())
         this.app.use(cookieSession({

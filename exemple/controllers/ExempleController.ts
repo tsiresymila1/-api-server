@@ -1,5 +1,5 @@
 
-import { SocketIO, Use } from "../../lib";
+import { Files, SocketIO, Use } from "../../lib";
 import { Get, OpenApi, Post } from "../../lib"
 import { Params, Headers, } from "../../lib";
 import { Controller } from "../../lib";
@@ -49,9 +49,9 @@ export default class ExempleController {
     })
     @Use(InjectMiddleWare)
     @Post('/register')
-    public async register(@SocketIO() socket: any, @Body() body: RegisterInput) {
-        const validators = Validator.validate(body) // validate body 
-        console.log(body.password, validators)
+    public async register(@SocketIO() socket: any, @Body() body: RegisterInput, @Files() files) {
+        const validators = Validator.check(body) // validate body 
+        console.log(body.password, validators, files)
         return {
             name: 'register',
         }

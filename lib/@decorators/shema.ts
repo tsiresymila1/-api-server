@@ -1,4 +1,5 @@
 import CryptoJS from 'crypto-js';
+import swagger from 'swagger-schema-official';
 
 interface JSONSchema {
     jsonschema: {
@@ -7,7 +8,7 @@ interface JSONSchema {
         required: string[]
     }
 }
-type PropOptions = { required?: boolean, type?: any }
+type PropOptions = swagger.BaseFormatContrainedParameter & swagger.BaseSchema
 
 export const Schema = () => {
     return (target: Function) => {
@@ -28,8 +29,9 @@ export const Schema = () => {
 
 }
 
-const optionsValue = { required: true, type: 'string' } as PropOptions;
-export const prop = (options: PropOptions = optionsValue) => {
+const defaultValue = { required: true, type: 'string', in: 'formData' } as PropOptions;
+
+export const prop = (options: PropOptions = defaultValue) => {
     return (target: any, propertyKey: PropertyKey) => {
         var t = Reflect.getMetadata("design:type", target, propertyKey.toString());
         const propertyName = `${String(propertyKey)}`
@@ -47,7 +49,13 @@ export const prop = (options: PropOptions = optionsValue) => {
             target['jsonschema'].required.push(propertyName)
         }
         target['jsonschema'].properties[propertyName] = {
-            type: String(t.name).toLowerCase()
+            ...options,
+            name: propertyName,
+            description: propertyName,
+            default: propertyName,
+            schema: {
+                type: "string"
+            }
         }
         Reflect.defineMetadata('class:schema', target['jsonschema'], target)
     }
@@ -80,15 +88,16 @@ export function use(target: Function) {
 
 // validators 
 
-export const check = (condition: (value: any, length: number) => boolean, message: string, options: { defaultlength: number, key: string } = { defaultlength: 0, key: '' }) => {
+export const check = (conditional: (value: any, length: number) => boolean, message: string, options: { defaultlength: number, key: string } = { defaultlength: 0, key: '' }) => {
     return (length: number = options.defaultlength, option?: { message?: string }) => {
         return (target: any, propertyKey: PropertyKey) => {
+            const key = '_' + options.key + '_valid_' + String(propertyKey);
             Object.defineProperty(target, propertyKey, {
                 get: () => {
-                    return target[options.key + '_' + String(propertyKey)];
+                    return target[key];
                 },
                 set: (newVal) => {
-                    if (!condition(newVal, length)) {
+                    if (!conditional(newVal, length)) {
                         if (!target.hasOwnProperty('easy-ts-api:errors')) {
                             Object.defineProperty(target, 'easy-ts-api:errors', {
                                 value: {}
@@ -96,7 +105,7 @@ export const check = (condition: (value: any, length: number) => boolean, messag
                         }
                         target['easy-ts-api:errors'][propertyKey] = option?.message ?? message
                     }
-                    target[options.key + '_' + String(propertyKey)] = newVal;
+                    target[key] = newVal;
                 },
                 enumerable: true,
                 configurable: true
@@ -112,14 +121,18 @@ export const isemail = check((newVal) => {
 
 export const notzero = check((newval) => {
     return newval != null && newval != undefined && parseInt(newval ?? '0', 10) != 0
-}, 'Not null value', { defaultlength: 10, key: 'notzero' })
+}, 'Not zero value', { defaultlength: 10, key: 'notzero' })
+
+export const notnull = check((newval) => {
+    return newval != null && newval != undefined
+}, 'Not null', { defaultlength: 10, key: 'notnull' })
 
 export const maxlength = check((newval, length) => {
     return newval && (newval).length <= length
 }, 'Max length not respected', { defaultlength: 10, key: 'maxlength' })
 
 export const minlength = check((newval, length) => {
-    return newval && (newval).length <= length
+    return newval && (newval).length >= length
 }, 'Min length not respected', { defaultlength: 10, key: 'minlength' })
 
 export const ispositive = check((newval) => {
@@ -130,14 +143,41 @@ export const isnegative = check((newval) => {
     return newval && parseInt(newval ?? 0, 0) < 0
 }, 'Min length not respected', { defaultlength: 10, key: 'isnegative' })
 
-export const hash = () => {
+type algoType = 'MD5' | 'SHA1' | 'SHA256' | 'SHA512'
+type callback = (key: any) => string
+export const hash = (algo: algoType | callback = 'MD5') => {
     return (target: any, propertyKey: PropertyKey) => {
+        const key = '_hash_' + String(propertyKey)
         Object.defineProperty(target, propertyKey, {
             get: () => {
-                return target['_' + String(propertyKey)];
+                return target[key];
             },
             set: (newVal) => {
-                target['_' + String(propertyKey)] = CryptoJS.SHA256(newVal).toString();
+                if (typeof algo === 'string') {
+                    switch (algo) {
+                        case 'MD5':
+                            target[key] = CryptoJS.SHA256(newVal).toString();
+                            break;
+                        case 'SHA1':
+                            target[key] = CryptoJS.SHA1(newVal).toString();
+                            break;
+                        case 'SHA256':
+                            target[key] = CryptoJS.SHA256(newVal).toString();
+                            break;
+                        case 'SHA512':
+                            target[key] = CryptoJS.SHA512(newVal).toString();
+                            break;
+                        default:
+                            target[key] = CryptoJS.SHA256(newVal).toString();
+                            break;
+                    }
+                }
+                else if (typeof algo === "function") {
+                    target[key] = algo(newVal) ?? newVal
+                }
+                else {
+                    target[key] = newVal
+                }
             },
             enumerable: true,
             configurable: true
