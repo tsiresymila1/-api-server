@@ -88,7 +88,7 @@ export const check = (condition: (value: any, length: number) => boolean, messag
                     return target[options.key + '_' + String(propertyKey)];
                 },
                 set: (newVal) => {
-                    if (condition(newVal, length)) {
+                    if (!condition(newVal, length)) {
                         if (!target.hasOwnProperty('easy-ts-api:errors')) {
                             Object.defineProperty(target, 'easy-ts-api:errors', {
                                 value: {}
@@ -107,23 +107,23 @@ export const check = (condition: (value: any, length: number) => boolean, messag
 
 export const isemail = check((newVal) => {
     var pattern = new RegExp(/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i);
-    return !pattern.test(newVal)
-}, 'Email not valid')
+    return pattern.test(newVal)
+}, 'Email not valid', { defaultlength: 10, key: 'isemail' })
 
 export const notzero = check((newval) => {
     return newval != null && newval != undefined && parseInt(newval ?? '0', 10) != 0
-}, 'Not null value')
+}, 'Not null value', { defaultlength: 10, key: 'notzero' })
 
 export const maxlength = check((newval, length) => {
-    return newval && (newval).length > length
+    return newval && (newval).length <= length
 }, 'Max length not respected', { defaultlength: 10, key: 'maxlength' })
 
 export const minlength = check((newval, length) => {
-    return newval && (newval).length < length
+    return newval && (newval).length <= length
 }, 'Min length not respected', { defaultlength: 10, key: 'minlength' })
 
 export const ispositive = check((newval) => {
-    return newval && parseInt(newval ?? 0, 0) > 0
+    return newval && parseInt(newval ?? 0, 0) >= 0
 }, 'Min length not respected', { defaultlength: 10, key: 'ispositive' })
 
 export const isnegative = check((newval) => {
