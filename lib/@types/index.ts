@@ -8,6 +8,7 @@ import { Model, ModelCtor } from "sequelize-typescript";
 export type ValidType = {
     isValid: boolean
     messages: any
+    data: any
 }
 
 export  interface ExpressMiddleWare {

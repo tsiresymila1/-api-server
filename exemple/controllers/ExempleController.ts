@@ -49,9 +49,9 @@ export default class ExempleController {
     })
     @Use(InjectMiddleWare)
     @Post('/register')
-    public async register(@SocketIO() socket: any, @Body() body: RegisterInput, @Files() files) {
+    public async register(@SocketIO() socket: any, @Body() body: RegisterInput, @Files('profile') profile) {
         const validators = Validator.check(body) // validate body 
-        console.log(body.password, validators, files)
+        console.log(body.password, validators.data, profile.filename)
         return {
             name: 'register',
         }
