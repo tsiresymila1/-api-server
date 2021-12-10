@@ -1,6 +1,6 @@
 {
     "name": "easy-ts-api",
-    "version": "1.0.9-d",
+    "version": "1.0.9-f",
     "description": "Api Server with open api interface",
     "main": "esm2015/index.js",
     "module": "esm2015/index.js",

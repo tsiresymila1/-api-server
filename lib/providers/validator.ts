@@ -6,14 +6,15 @@ export class Validator {
         if (data) {
             const properties: { [key: string]: [value: string] } = {}
             let content = Reflect.getMetadata("class:schema", data)
+            let error = Reflect.getMetadata('class:error', data)
             for (let c of Object.keys(content['properties']) ?? []) {
                 properties[`${String(c)}`] = data[c]
             }
-            if (data['easy-ts-api:errors']) {
+            if (error && Object.keys(error).length > 0) {
                 return {
                     isValid: false,
                     data: properties,
-                    messages: data['easy-ts-api:errors']
+                    messages: error
                 } as ValidType
             }
             else {

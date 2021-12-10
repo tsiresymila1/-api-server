@@ -91,20 +91,26 @@ export function use(target: Function) {
 export const check = (conditional: (value: any, length: number) => boolean, message: string, options: { defaultlength: number, key: string } = { defaultlength: 0, key: '' }) => {
     return (length: number = options.defaultlength, option?: { message?: string }) => {
         return (target: any, propertyKey: PropertyKey) => {
-            const key = '_' + options.key + '_valid_' + String(propertyKey);
-            Object.defineProperty(target, propertyKey, {
+            const propertyname = String(propertyKey)
+            const key = '_' + Date.now() + '_' + options.key + '_valid_' + propertyname;
+            Object.defineProperty(target, propertyname, {
                 get: () => {
                     return target[key];
                 },
                 set: (newVal) => {
-                    if (!conditional(newVal, length)) {
-                        if (!target.hasOwnProperty('easy-ts-api:errors')) {
-                            Object.defineProperty(target, 'easy-ts-api:errors', {
-                                value: {}
-                            })
-                        }
-                        target['easy-ts-api:errors'][propertyKey] = option?.message ?? message
+                    let reflect = Reflect.getMetadata('class:error', target)
+                    if (!reflect) {
+                        reflect = {}
                     }
+                    if (!conditional(newVal, length)) {
+                        reflect[propertyname] = option?.message ?? message
+                    }
+                    else {
+                        if (Object.keys(reflect).includes(propertyname)) {
+                            delete reflect[propertyname];
+                        }
+                    }
+                    Reflect.defineMetadata('class:error', reflect, target)
                     target[key] = newVal;
                 },
                 enumerable: true,

@@ -54,6 +54,7 @@ export default class ExempleController {
         console.log(body.password, validators.data, profile.filename)
         return {
             name: 'register',
+            message: validators.messages
         }
     }
 }
