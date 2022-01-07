@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { App, ExpressApplication, AppFactory, FastifyApplication, OpenAPiParams } from "../lib";
 import { serverOption } from './config/app';
+import { databaseConfig } from "./config/database";
 
 
 
@@ -35,6 +36,7 @@ async function bootstrap() {
             title: 'Test API'
         }
     } as OpenAPiParams)
+    app.initDatabase(databaseConfig);
     app.configDatabaseOption({
         force: true,
         alter: true

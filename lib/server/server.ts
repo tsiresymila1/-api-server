@@ -1,7 +1,7 @@
 import { json, urlencoded } from 'body-parser';
 import cookieParser from 'cookie-parser'
 import cookieSession from 'cookie-session'
-import { OpenAPiParams, ServerOption } from '../@types';
+import { DatabaseConfig, OpenAPiParams, ServerOption } from '../@types';
 import { Express } from 'express';
 import { FastifyInstance } from 'fastify';
 import { AppMiddleware } from './../@types/index';
@@ -20,6 +20,7 @@ var globule = require('globule');
 
 export class App {
     options?: ServerOption
+    databaseConfig?: DatabaseConfig
     openapiOptions?: OpenAPiParams
     app: Express | FastifyInstance | undefined
     isfastify?: boolean
@@ -41,6 +42,9 @@ export class App {
     }
     public setServerOption(options: ServerOption) {
         this.options = options;
+    }
+    public initDatabase(config: DatabaseConfig) {
+        this.databaseConfig = config;
     }
 
     public async serve(...args: any) {
@@ -68,6 +72,10 @@ export class App {
     }
 
     public async config() {
+        // check if have database config
+        if(this.databaseConfig){
+            this.db = new Sequelize(this.databaseConfig)
+        }
         const app = (this.app as any)
         if (this.options && this.options.cors) {
             app['use'](require('cors')())

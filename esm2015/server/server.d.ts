@@ -1,4 +1,4 @@
-import { OpenAPiParams, ServerOption } from '../@types';
+import { DatabaseConfig, OpenAPiParams, ServerOption } from '../@types';
 import { Express } from 'express';
 import { FastifyInstance } from 'fastify';
 import { AppMiddleware } from './../@types/index';
@@ -7,6 +7,7 @@ import { Sequelize } from 'sequelize-typescript';
 import { SyncOptions } from 'sequelize/types';
 export declare class App {
     options?: ServerOption;
+    databaseConfig?: DatabaseConfig;
     openapiOptions?: OpenAPiParams;
     app: Express | FastifyInstance | undefined;
     isfastify?: boolean;
@@ -18,6 +19,7 @@ export declare class App {
     spec: swagger.Spec;
     constructor();
     setServerOption(options: ServerOption): void;
+    initDatabase(config: DatabaseConfig): void;
     serve(...args: any): Promise<void>;
     config(): Promise<void>;
     setup(): Promise<void>;

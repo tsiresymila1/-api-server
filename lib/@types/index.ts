@@ -4,7 +4,7 @@ import multer from "multer"
 import {OptionsJson,OptionsUrlencoded} from "body-parser"
 import { CookieSerializeOptions } from "cookie"
 import swagger from 'swagger-schema-official';
-import { Model, ModelCtor } from "sequelize-typescript";
+import { Model, ModelCtor, SequelizeOptions } from "sequelize-typescript";
 export type ValidType = {
     isValid: boolean
     messages: any
@@ -68,4 +68,5 @@ export interface AppSocketMiddleware {
     use: (socket: any, next: ((err?: any) => any)) => void
 }
 
+export type DatabaseConfig = SequelizeOptions 
 

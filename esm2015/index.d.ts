@@ -10,4 +10,5 @@ export * from './server/fastify-server';
 export * from './server/express-server';
 export * from './@factory/factory';
 export * from './providers/hash';
+export * from './utils/env';
 export * from './providers/validator';
