@@ -43,12 +43,16 @@ export class App {
     public setServerOption(options: ServerOption) {
         this.options = options;
     }
-    public initDatabase(config: DatabaseConfig) {
-        this.databaseConfig = config;
+    public configDatabaseOption(options: SyncOptions) {
+        this.syncOption = options;
     }
-
-    public async serve(...args: any) {
-        await this.config()
+    public async initDatabase(config: DatabaseConfig, sync:boolean = false) {
+        
+        this.databaseConfig = config;
+        // check if have database config
+        if(this.databaseConfig){
+            this.db = new Sequelize(this.databaseConfig)
+        }
         // loads models 
         if (this.options?.models) {
             const modelsFinds = this.options?.models?.reduce<(string | ModelCtor<Model<any, any>>)[]>((p, n) => {
@@ -61,7 +65,17 @@ export class App {
         else {
             this.db.addModels([path.join(process.cwd(), 'models/**/*Model') + String(ENV.Get('EXTENSION') ?? '.ts')]);
         }
-        await this.db.sync(this.syncOption ? this.syncOption : { alter: false });
+        //authenticate database 
+        await this.db.authenticate()
+        // sync database with model 
+        if(sync){
+            await this.db.sync(this.syncOption ? this.syncOption : { alter: false });
+        }
+    }
+
+    public async serve(...args: any) {
+
+        await this.config();
         //register db to request
         (this.app as any)['use']((req: any, res: any, next: () => void) => {
             req.db = this.db
@@ -72,10 +86,7 @@ export class App {
     }
 
     public async config() {
-        // check if have database config
-        if(this.databaseConfig){
-            this.db = new Sequelize(this.databaseConfig)
-        }
+        
         const app = (this.app as any)
         if (this.options && this.options.cors) {
             app['use'](require('cors')())
@@ -190,10 +201,6 @@ export class App {
             },
             paths: {},
         }
-    }
-
-    public configDatabaseOption(options: SyncOptions) {
-        this.syncOption = options;
     }
 
     public async configOpenApiMiddleware() {

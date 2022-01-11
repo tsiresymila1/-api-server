@@ -19,7 +19,8 @@ export declare class App {
     spec: swagger.Spec;
     constructor();
     setServerOption(options: ServerOption): void;
-    initDatabase(config: DatabaseConfig): void;
+    configDatabaseOption(options: SyncOptions): void;
+    initDatabase(config: DatabaseConfig, sync?: boolean): Promise<void>;
     serve(...args: any): Promise<void>;
     config(): Promise<void>;
     setup(): Promise<void>;
@@ -29,6 +30,5 @@ export declare class App {
     }): void;
     use(middleware: (new () => AppMiddleware) | String, callback: (new () => AppMiddleware)): void;
     configOpenAPi(openapiOptions: OpenAPiParams): void;
-    configDatabaseOption(options: SyncOptions): void;
     configOpenApiMiddleware(): Promise<void>;
 }

@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { App, ExpressApplication, AppFactory, FastifyApplication, OpenAPiParams } from "../lib";
+import { App, AppFactory, FastifyApplication, OpenAPiParams } from "../esm2015";
 import { serverOption } from './config/app';
 import { databaseConfig } from "./config/database";
 
@@ -36,11 +36,12 @@ async function bootstrap() {
             title: 'Test API'
         }
     } as OpenAPiParams)
-    app.initDatabase(databaseConfig);
     app.configDatabaseOption({
         force: true,
         alter: true
     })
+    app.initDatabase(databaseConfig);
+    
     await app.serve(3000, 'localhost', 50, (_e, host) => {
         console.log(`Instance of fastify server running on  ${host}`)
     });
