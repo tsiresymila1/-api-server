@@ -164,7 +164,20 @@ PASSWORD=password
 EXTENSION=.ts // .js for production
 ```
 And model is base on sequilize-typescritpt 
+You can also define you custom config for database by crete file inside config/database.ts 
+and put you own value. 
 
+```ts
+export const databaseConfig : DatabaseConfig = {
+    database: ENV.Get('DATABASE'),
+    host: ENV.Get('HOST'),
+    port: ENV.Get('PORT') || 3306,
+    dialect:  ENV.Get('DRIVER'),
+    username: ENV.Get('USER'),
+    password: ENV.Get('PASSWORD'),
+    logging: console.log
+}
+```
 
 ```ts
 import { AutoIncrement, Column, Model, PrimaryKey, Table } from "sequelize-typescript";
@@ -222,7 +235,6 @@ export const serverOption: ServerOption = {
     enableSocketIo: true
 }
 ```
-
 and Create socket controller 
 
 ```ts
@@ -321,7 +333,12 @@ app.configDatabaseOption({
     force: true, // sequelize options
     alter: true
 })
+
+// use this if you use custom database config
+app.initDatabase(databaseConfig);
+
 ...
 ```
+
 ### Tsiresy Milà
 #### tsiresymila@gmail.com

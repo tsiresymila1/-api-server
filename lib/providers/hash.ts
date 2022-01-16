@@ -2,6 +2,7 @@ import JWT, { Algorithm } from 'jsonwebtoken';
 import { ENV } from "./../utils/env";
 
 export class Hash {
+    static  defaultkey : string = "super_key"
     public static generate(id: any, expiresInexp: any = '24h') {
         return JWT.sign({ 
             data : {
@@ -9,14 +10,13 @@ export class Hash {
             }, 
             expiresInexp: expiresInexp
         }, 
-            ENV.Get('KEY') ?? 'super_key',
+            ENV.Get('KEY') ?? Hash.defaultkey,
         )
     }
 
-    public static auth(token:string) : boolean {
+    public static auth(token:string) : any | boolean {
         try {
-            JWT.verify(token, ENV.Get('KEY') ?? 'super_key');
-            return true
+            return JWT.verify(token, ENV.Get('KEY') ?? Hash.defaultkey);
           } catch(err) {
             return false;
           }
