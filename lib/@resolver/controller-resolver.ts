@@ -1,14 +1,16 @@
-import { FastifyInstance, FastifyRequest } from "fastify";
+import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { AppMiddleware } from "../@types/index";
 import cookie from 'cookie';
-import { Express, Request } from 'express'
+import { Express, Request, Response } from 'express'
 import { AppRequest, AppResponse, RouteParams, ParamsKey, CookieType } from "../@types";
 import { CookieSerializeOptions } from 'cookie';
 import { pathToRegexp, compile, Key } from "path-to-regexp";
 import swagger from 'swagger-schema-official';
 import { App } from '../server/server';
 import { plainToInstance } from 'class-transformer';
-
+import mime from 'mime';
+import {join as pathFileJoin} from "path";
+import fs from 'fs';
 const bindParams = (params: null | ParamsKey[], req: AppRequest, res: AppResponse, isFastify: boolean, cookieparams?: CookieSerializeOptions, app?: FastifyInstance | Express): any[] => {
     let methodParams: any[] = []
     params?.forEach((value: ParamsKey) => {
@@ -44,6 +46,9 @@ const bindParams = (params: null | ParamsKey[], req: AppRequest, res: AppRespons
                     return p
                 }, {})
                 break
+            case 'renderer':
+                param = (req as Request).app.get('renderer');
+                break;
             default:
                 const request: any = isFastify ? (req as FastifyRequest).raw : (req as Request)
                 param = request[value.param];
@@ -160,9 +165,31 @@ export const registerController = async (app: FastifyInstance | Express, object:
                 let methodParams = bindParams(params, req, res, isFastify, cookieparams, app);
                 method(...methodParams).then((data: any) => {
                     if (renderType) {
-                        res.header('Content-type', renderType);
+                        res.type(renderType);
                     }
-                    res.send(data)
+                    if(route.renderfile){
+                        const renderType = mime.getType(data)
+                        if(route.renderfile.download){
+                            res.header('Content-Disposition', 'attachment;filename=' + data);
+                        }
+                        if(renderType) res.type(renderType);
+                        const filepath = pathFileJoin(process.cwd(),route.renderfile.storage ?? '',data)
+                        if(!isFastify){
+                            (res as Response).download(filepath)
+                        }
+                        else{
+                            const stream = fs.readFileSync(filepath);
+                            res = (res as FastifyReply).type(renderType ?? 'application/octet-stream').send(stream);
+                        }
+                    }
+                    else if(route.render && !isFastify){
+                        
+                        (res as Response).render(route.render, data)
+                    }
+                    else{
+                        res.send(data)
+                    }
+                    
                 }).catch((err: { message: string, stack: string } | any) => {
                     res.send({ error: err.message ?? err }).status(500)
                 });

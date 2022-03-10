@@ -1,4 +1,4 @@
-import { DatabaseConfig, ENV } from "../../esm2015";
+import { DatabaseConfig, ENV } from "../../lib";
 
 export const databaseConfig : DatabaseConfig = {
     database: ENV.Get('DATABASE'),

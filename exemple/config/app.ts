@@ -1,5 +1,5 @@
 
-import { ServerOption } from "../../esm2015";
+import { ServerOption } from "../../lib";
 import path from "path";
 export const serverOption: ServerOption = {
     controllers: [path.join(__dirname, '..', '/controllers/**/*Controller')],
@@ -7,5 +7,7 @@ export const serverOption: ServerOption = {
     models: [path.join(__dirname, '..', '/models/**/*Model')],
     sockets: [path.join(__dirname, '..', '/sockets/**/*SocketController')],
     cors: true,
-    enableSocketIo: true
+    enableSocketIo: true,
+    views: path.join(__dirname,'..', 'views'),
+    viewEngine: 'twig'
 }

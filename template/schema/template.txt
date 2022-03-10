@@ -1,0 +1,22 @@
+
+import { Schema, prop } from 'easy-ts-api';
+import { hash, isemail, maxlength, minlength } from 'easy-ts-api';
+
+@Schema()
+export class {{name}}Input {
+    @maxlength(20)
+    @prop()
+    name: string
+
+    @isemail()
+    @prop()
+    email: string
+
+    @hash()
+    @minlength(8)
+    @prop()
+    password: string
+
+    @prop({ type: 'file', format: 'binary', description: '', in: 'formData', name: 'profile' })
+    profile: any
+}

@@ -8,6 +8,9 @@ import { App } from "./server";
 import swaggerUi from 'swagger-ui-express'
 import http from 'http'
 import { Server } from 'socket.io';
+import  {edgeEngine, setupEdgeJsBundle } from './edge-template';
+import  {twigEngine,setupTwigJsBundle } from './twing-template';
+
 
 export class ExpressApplication extends App {
     app: Express
@@ -38,7 +41,20 @@ export class ExpressApplication extends App {
             name: 'session',
             keys: this.options?.sessionSecretKey ?? ['super_secret', 'super_secret']
         }))
-        this.app.use(this.options?.staticUrl ?? '/static', express.static(this.options?.staticFolder ?? path.join(__dirname, 'public')));
+        const staticPath = this.options?.staticUrl ?? '/static';
+        this.app.use(staticPath, express.static(this.options?.staticFolder ?? path.join(__dirname, 'public')));
+        
+        if(this.options?.viewEngine && this.options?.viewEngine === "edge"){
+            setupEdgeJsBundle(staticPath)
+            this.app.use(edgeEngine);
+        }
+        else{   
+            setupTwigJsBundle(staticPath)
+            this.app.use(twigEngine)
+        }
+        
+        this.app.set('views', this.options?.views ?? path.join(__dirname, 'views'));
+
     }
 
     public async configOpenApiMiddleware() {
@@ -49,7 +65,7 @@ export class ExpressApplication extends App {
         await super.serve()
         // register socket controllers here ;
         if (this.server) {
-            this.server.listen(3000, () => {
+            this.server.listen(port, () => {
                 console.log('Server with socket ')
                 if (callback) {
                     callback(port)
@@ -57,7 +73,7 @@ export class ExpressApplication extends App {
             })
         }
         else {
-            this.app.listen(3000, () => {
+            this.app.listen(port, () => {
                 if (callback) {
                     callback(port)
                 }

@@ -35,6 +35,8 @@ export interface  ServerOption {
     staticFolder? :string,
     staticUrl?: string
     enableSocketIo?: boolean
+    views?: string
+    viewEngine?: 'twig' | 'edge'
  }
 
 
@@ -42,6 +44,11 @@ export interface  ServerOption {
  export interface RouteParams {
      url: string,
      method: string
+     render?: string
+     renderfile?: {
+        storage?: string,
+        download?:boolean
+     }
      
  }
 

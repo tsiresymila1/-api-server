@@ -2,7 +2,7 @@
 import { Server, Socket } from 'socket.io';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { ParamsKey } from '..';
-import { AppSocketMiddleware } from './../@types/index';
+import { AppSocketMiddleware } from '../@types/index';
 
 type AsyncFunction = (...args: any) => Promise<any>
 

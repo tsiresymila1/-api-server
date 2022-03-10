@@ -23,6 +23,7 @@
     "exclude": [
         "node_modules",
         "exemple",
-        "esm2015"
+        "esm2015",
+        "template"
     ]
 }

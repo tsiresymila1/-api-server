@@ -32,10 +32,17 @@ export interface ServerOption {
     staticFolder?: string;
     staticUrl?: string;
     enableSocketIo?: boolean;
+    views?: string;
+    viewEngine?: 'twig' | 'edge';
 }
 export interface RouteParams {
     url: string;
     method: string;
+    render?: string;
+    renderfile?: {
+        storage?: string;
+        download?: boolean;
+    };
 }
 export interface CookieType {
     set: (key: string, value: string) => any;

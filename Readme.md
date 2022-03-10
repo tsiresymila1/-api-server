@@ -232,7 +232,9 @@ export const serverOption: ServerOption = {
     models: [path.join(__dirname, '..', '/models/**/*Model.ts')],
     sockets: [path.join(__dirname, '..', '/sockets/**/*SocketController')], // socket controller
     cors: true,
-    enableSocketIo: true
+    enableSocketIo: true,
+    views: path.join(__dirname,'..', 'views'), // view path 
+    viewEngine: 'twig' // twig or edge ( default twig)
 }
 ```
 and Create socket controller 
@@ -309,6 +311,28 @@ After all, you can able to SocketIO from controller method parameter
         return {
             name: 'register',
         }
+    }
+
+...
+
+```
+
+### Render file or render template 
+#### Render template work only with express 
+
+```ts
+
+...
+    @Render('users.index')
+    @Get('/users')
+    public async index(@View() twig: TwingEnvironment){
+        return {title: 'Index'}
+    }
+
+    @RenderFile('storage')
+    @Get('/file')
+    public async file(){
+        return 'images/b1.jpg'
     }
 
 ...

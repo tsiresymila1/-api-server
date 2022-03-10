@@ -13,7 +13,7 @@ import { registerController, registerMiddleware } from '../@decorators';
 import { Model, ModelCtor, Sequelize } from 'sequelize-typescript';
 import database from '../providers/database';
 import { ENV } from './../utils/env';
-import { registerSocket } from './../@factory/socket-factory';
+import { registerSocket } from '../@resolver/socket-resolver';
 import { Server } from 'socket.io';
 import { SyncOptions } from 'sequelize/types';
 var globule = require('globule');

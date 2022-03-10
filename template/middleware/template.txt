@@ -1,0 +1,11 @@
+import { NextFunction, Request, Response } from 'express';
+import { AppMiddleware, Middleware } from 'easy-ts-api';
+
+@Middleware()
+export default class {{name}} implements AppMiddleware {
+
+    public use(req: Request, res: Response, next: NextFunction){
+        // provide implementation here
+        next();
+    }
+}

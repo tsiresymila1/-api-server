@@ -1,8 +1,10 @@
 import Fastify, { FastifyInstance } from "fastify";
 import { ServerOption } from "../@types";
-import express, { Express } from 'express';
+import  { Express } from 'express';
 import path from 'path';
 import { App } from "./server";
+import { setupEdgeJsBundle, edgeEngine } from "./edge-template";
+import { setupTwigJsBundle, twigEngine } from "./twing-template";
 
 
 export class FastifyApplication extends App {
@@ -21,14 +23,25 @@ export class FastifyApplication extends App {
         if (this.options?.enableSocketIo) {
             await this.app.register(require('fastify-socket.io'))
         }
+        const staticPath = this.options?.staticUrl ?? '/static';
         // await this.app.register(require('middie'))
         await this.app.register(require('fastify-express'))
         await this.app.register(require('fastify-cookie'))
         await this.app.register(require('fastify-static'), {
             root: this.options?.staticFolder ?? path.join(__dirname, 'public'),
-            prefix: this.options?.staticUrl ?? '/static',
+            prefix: staticPath,
         })
         await this.app.register(require('fastify-multipart'))
+        // if(this.options?.viewEngine && this.options?.viewEngine === "edge"){
+        //     setupEdgeJsBundle(staticPath)
+        //     this.app.use(edgeEngine);
+        // }
+        // else{   
+        //     setupTwigJsBundle(staticPath)
+        //     this.app.use(twigEngine)
+        // }
+        // this.app.set('views', this.options?.views ?? path.join(__dirname, 'views'));
+
         super.config();
     }
 

@@ -4,3 +4,4 @@ docker-compose.override.yml
 *.js.map
 .env
 public/**
+exemple/storage/**

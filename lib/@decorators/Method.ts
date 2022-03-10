@@ -9,6 +9,7 @@ const methodFactory = (method: string)=>{
                 target['routes'][propertyKey] =  {
                     method: method,
                     url : url,
+                    render: null
                 };
             }
             else{
@@ -16,6 +17,7 @@ const methodFactory = (method: string)=>{
                     [propertyKey]: {
                         method: method, 
                         url : url,
+                        render: null
                     }
                 }
             }
@@ -59,6 +61,28 @@ export const OpenApi = (options: swagger.Operation) => {
         options.operationId = operationId
         options.tags = [String(target.constructor.name).replace('Controller','')]
         target['paths'][propertyKey] = options
+        return target;
+    } 
+    
+}
+export const Render = (file:string) => {
+    return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+        if(target['routes']){
+            target['routes'][propertyKey]['render'] = file;
+        }
+        return target;
+    } 
+    
+}
+
+export const RenderFile = (storage?:string,download?:boolean) => {
+    return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+        if(target['routes']){
+            target['routes'][propertyKey]['renderfile'] =  {
+                storage,
+                download
+            };
+        }
         return target;
     } 
     

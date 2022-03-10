@@ -26,7 +26,7 @@ export const Controller = (options?: string | ControllerOptions, responseType?: 
             value: url
         })
         Object.defineProperty(target,'render', {
-            value: responseType
+            value: responseType ?? 'text/html'
         })
     }
 }

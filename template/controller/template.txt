@@ -1,8 +1,9 @@
-import { Controller, Get, Params, Headers, OpenApi, Render,View,RenderFile } from "../../lib";
+import { Controller, Get, Params, Headers, OpenApi, Render, View, RenderFile } from "easy-ts-api";
 import { TwingEnvironment } from 'twing';
 import path from 'path';
-@Controller({ prefix: '/api' })
-export default class TestController {
+
+@Controller({ prefix: '/{{name}}' })
+export default class {{name}} {
 
     @OpenApi({
         responses: {
@@ -12,19 +13,19 @@ export default class TestController {
             }
         }
     })
-    @Get('/user/:id')
-    public async getUser(@Params('id') id: number, @Headers('authorization') authorization) {
+    @Get('/:id')
+    public async get(@Params('id') id: number, @Headers('authorization') authorization) {
         return {
-            name: 'user', 
+            name: 'user',
             params: id,
             authorization: authorization
         }
     }
 
-    @Render('users.index')
-    @Get('/users')
-    public async index(@View() twig: TwingEnvironment){
-        return {title: 'Index'}
+    @Render('{{name}}.index')
+    @Get('/{{name}}s')
+    public async index(@View() twig: TwingEnvironment) {
+        return { title: 'Index' }
     }
 
     @RenderFile(path.join('exemple', 'storage'), true)

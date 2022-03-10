@@ -1,20 +1,12 @@
 import { AutoIncrement, Column, Model, PrimaryKey, Table } from "sequelize-typescript";
-import { prop, Schema } from './../../lib';
 
 @Table({
     timestamps: true,
 })
-@Schema()
-export default class User extends Model {
+export default class {{name}} extends Model {
 
     @AutoIncrement
     @PrimaryKey
     @Column
-    @prop()
     id: number;
-
-
-    @Column
-    @prop()
-    nickname: string;
 }
