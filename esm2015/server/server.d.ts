@@ -23,6 +23,7 @@ export declare class App {
     initDatabase(config: DatabaseConfig, sync?: boolean): Promise<void>;
     serve(...args: any): Promise<void>;
     config(): Promise<void>;
+    setupMiddleware(t?: string): Promise<void>;
     setup(): Promise<void>;
     configMulter(): Promise<void>;
     setMiddlewares(middlewares: {

@@ -1,10 +1,33 @@
 import { NextFunction,Request,Response } from 'express';
 import { Edge } from 'edge.js'
+import fs from 'fs';
+import path from 'path';
 
 export const edge = new Edge({ cache: false })
-export const setupEdgeJsBundle = (p: string) => {
-  edge.global('jsBundle', function(file: string){
-    return `<script defer src="${p}/${file}"></script>`
+export const setupEdgeJsBundle = (p: string, s: string) => {
+  const fileManifest = path.join(p, 'manifest.json');
+  let jsScript = '';
+  let cssStyle : string[] = [];
+  if(fs.existsSync(fileManifest)){
+    const manifestContent = fs.readFileSync(fileManifest).toString()
+    const manifestJson = JSON.parse(manifestContent);
+    const keys = Object.keys(manifestJson)
+    if(keys.length > 0){
+      const key = keys[0]
+      jsScript = manifestJson[key]['file']
+      cssStyle = manifestJson[key]['css']
+    }
+    
+  }
+
+  edge.global('jsBundle', function(){
+    return `<script defer src="${s}/${jsScript}"></script>`
+  });
+
+  edge.global('cssBundle', function(){
+    return cssStyle.reduce((c,n)=>{
+      return (new String()).concat(c,`<link rel="stylesheet" type="text/css" href="${s}/${n}"></link>`)
+    },'')
   });
 }
 

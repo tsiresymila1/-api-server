@@ -1,0 +1,11 @@
+import {{name}} from "./../models/{{name}}";
+
+export class {{name}}Repository {
+
+  private model = {{name}};
+
+  public async get(id: number) {
+    return this.model.findByPk(id);
+  }
+
+}

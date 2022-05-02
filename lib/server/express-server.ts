@@ -35,6 +35,7 @@ export class ExpressApplication extends App {
         }
         super.config();
         this.app.use(raw(this.options?.json ?? { limit: '50mb' }))
+        this.app.use(json(this.options && this.options.json ? this.options.json : { limit: '150mb' }))
         this.app.use(urlencoded(this.options?.urlencoded ?? { extended: true }));
         this.app.use(cookieParser())
         this.app.use(cookieSession({
@@ -42,14 +43,14 @@ export class ExpressApplication extends App {
             keys: this.options?.sessionSecretKey ?? ['super_secret', 'super_secret']
         }))
         const staticPath = this.options?.staticUrl ?? '/static';
-        this.app.use(staticPath, express.static(this.options?.staticFolder ?? path.join(__dirname, 'public')));
+        this.app.use(staticPath, express.static(this.options?.staticFolder ?? path.join(process.cwd(), 'public')));
         
         if(this.options?.viewEngine && this.options?.viewEngine === "edge"){
-            setupEdgeJsBundle(staticPath)
+            setupEdgeJsBundle(path.join(process.cwd(),'public'), staticPath)
             this.app.use(edgeEngine);
         }
         else{   
-            setupTwigJsBundle(staticPath)
+            setupTwigJsBundle(path.join(process.cwd(),'public'),staticPath)
             this.app.use(twigEngine)
         }
         

@@ -2,3 +2,4 @@ _bdd
 docker-*
 .env*
 Dockerfile
+public

@@ -24,8 +24,9 @@ export type AppResponse = Response | FastifyReply
 export interface  ServerOption {
     sessionSecretKey?: string[],
     cors?: boolean,
-    controllers?: Function[] | String[],
+    controllers?: (new () => any)[] | String[],
     middlewares?: Function[] | String[],
+    afterMiddlewares?: Function[] | String[],
     models?: (string | ModelCtor<Model<any, any>>)[],
     sockets?: Function[] | String[],
     uploadOption?: multer.Options,
@@ -33,6 +34,7 @@ export interface  ServerOption {
     urlencoded? : OptionsUrlencoded;
     cookieParams?: CookieSerializeOptions,
     staticFolder? :string,
+    uploadFolder? :string,
     staticUrl?: string
     enableSocketIo?: boolean
     views?: string

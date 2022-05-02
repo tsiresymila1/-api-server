@@ -100,11 +100,14 @@ export class App {
         }))
     }
 
-    public async setup() {
-        // load middlewares 
-        if (this.options && Array.isArray(this.options.middlewares) && this.options.middlewares.length > 0 && (this.options.middlewares as any[]).every(t => typeof t === "string")) {
-            // (this.options.middlewares as String[]).push('!**/Inject*')
-            const middlewaresFind = (this.options.middlewares as String[])?.reduce((p, n) => {
+    public async setupMiddleware(t:string = 'before'){
+        let opts = this.options?.middlewares
+        if(t === 'after'){ 
+            opts = this.options?.afterMiddlewares
+        }
+        if (this.options && Array.isArray(opts) && opts.length > 0 && (opts as any[]).every(t => typeof t === "string")) {
+            // (opts as String[]).push('!**/Inject*')
+            const middlewaresFind = (opts as String[])?.reduce((p, n) => {
                 const s = String(n) + String(ENV.Get('EXTENSION') ?? '.ts')
                 p.push(s)
                 return p;
@@ -116,7 +119,7 @@ export class App {
             }
         }
         else if (this.options) {
-            this.middlewares['/'].concat(this.options.middlewares as (new () => AppMiddleware)[])
+            this.middlewares['/'].concat(opts as (new () => AppMiddleware)[])
         }
         // config middlewares 
         for (let key of Object.keys(this.middlewares) || []) {
@@ -125,6 +128,12 @@ export class App {
                 await registerMiddleware(this, new middleware(), key)
             }
         }
+        this.middlewares = { "/": [] };
+    }
+
+    public async setup() {
+        // load middlewares 
+        await this.setupMiddleware('before')
         // config file upload
         this.configMulter()
 
@@ -134,12 +143,18 @@ export class App {
                 let directory = path.join(controller.toString() + String(String(ENV.Get('EXTENSION') ?? '.ts')))
                 let controllers = glob.sync(directory);
                 for (let ctrl of controllers) {
-                    controller = require(ctrl).default as Function;
-                    this.spec = await registerController((this.app as any), controller, this.isfastify ?? false, this.spec, this.options && this.options.cookieParams ? this.options.cookieParams : undefined,)
+                    let c : new () => any = require(ctrl).default ;
+                    if (Object.getOwnPropertyDescriptors(c)['easy-ts-api:controller']){
+                        this.spec = await registerController((this.app as any),c , this.isfastify ?? false, this.spec, this.options && this.options.cookieParams ? this.options.cookieParams : undefined,)
+                    }
+                    
                 }
             }
             else {
-                this.spec = await registerController((this.app as any), controller as Function, this.isfastify ?? false, this.spec, this.options && this.options.cookieParams ? this.options.cookieParams : undefined)
+                let c  = (controller as new () => any)
+                if (Object.getOwnPropertyDescriptors(c)['easy-ts-api:controller']){
+                    this.spec = await registerController((this.app as any),c,this.isfastify ?? false, this.spec, this.options && this.options.cookieParams ? this.options.cookieParams : undefined)
+                }
             }
         }
         // register socket
@@ -156,12 +171,15 @@ export class App {
         }
         // setup openapi
         await this.configOpenApiMiddleware()
+
+        //after middleware
+        await this.setupMiddleware('after')
     }
 
     public async configMulter() {
         const storage = multer.diskStorage({
             destination: (req, file, cb) => {
-                cb(null, path.join(process.cwd(), String(this.options?.staticFolder ?? 'public') + '/uploads/'))
+                cb(null, path.join(String(this.options?.staticFolder ?? path.join(process.cwd(),'public')),String(this.options?.uploadFolder ?? 'uploads/')))
             },
             filename: (req, file, cb) => {
                 let ext = file.originalname.substring(file.originalname.lastIndexOf('.'), file.originalname.length);

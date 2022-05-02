@@ -14,3 +14,4 @@ export * from './@resolver/resolver';
 export * from './providers/hash';
 export * from './utils/env';
 export * from './providers/validator';
+export * from './@command/Console';

@@ -1,0 +1,26 @@
+import {{name}} from "./../models/{{name}}";
+
+export class {{name}}Repository {
+
+  private model = {{name}};
+
+  public async get(id: number) {
+    return this.model.findByPk(id);
+  }
+
+  public async create(data: Record<string, any>) {
+    return this.model.create(data);
+  }
+
+  public async update(id: number,data: Record<string, any>) {
+    return this.model.update(data,{ returning: true, where: { id: id } }
+    );;
+  }
+  public async delete(id: number) {
+    return this.model.destroy({
+      where: {
+        id: id,
+      },
+    });
+  }
+}

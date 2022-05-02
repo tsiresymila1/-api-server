@@ -8,8 +8,7 @@ import InjectClassMiddleWare from "../middlewares/InjectClassMiddleware";
 import InjectMiddleWare from "../middlewares/InjectMiddleware";
 
 import { Hash } from '../../lib';
-import { RegisterInput } from './../schema/register';
-
+import { RegisterInput } from '../schema/register';
 
 @Use(InjectClassMiddleWare)
 @Controller({ prefix: '/api' })
@@ -32,7 +31,7 @@ export default class ExempleController {
     public async login(@Params('id') id: number, @Headers('authorization') authorization) {
         const a = Hash.generate(5)
         return {
-            name: 'login', 
+            name: 'login',
             params: id,
             authorization: authorization,
             token: a
@@ -50,7 +49,7 @@ export default class ExempleController {
     @Use(InjectMiddleWare)
     @Post('/register')
     public async register(@SocketIO() socket: any, @Body() body: RegisterInput, @Files('profile') profile) {
-        const validators = Validator.check(body) // validate body 
+        const validators = Validator.check(body) // validate body
         console.log(body.password, validators.data, profile.filename)
         return {
             name: 'register',

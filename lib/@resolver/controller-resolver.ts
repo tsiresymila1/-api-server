@@ -69,20 +69,22 @@ const bindParams = (params: null | ParamsKey[], req: AppRequest, res: AppRespons
     return methodParams;
 }
 
-export const registerController = async (app: FastifyInstance | Express, object: Function, isFastify: boolean, spec: swagger.Spec, cookieparams?: CookieSerializeOptions,): Promise<swagger.Spec> => {
-    if (!Object.getOwnPropertyDescriptors(object)['easy-ts-api:controller']) return spec;
+export const registerController = async (app: FastifyInstance | Express, object: new () => any, isFastify: boolean, spec: swagger.Spec, cookieparams?: CookieSerializeOptions,): Promise<swagger.Spec> => {
+    
+    
+    let properties: string[] = Object.getOwnPropertyNames(object.prototype)
     let baseUrl: string = Object.getOwnPropertyDescriptors(object)['baseUrl'].value
     let renderType: string = Object.getOwnPropertyDescriptors(object)['render'].value
-    let properties: string[] = Object.getOwnPropertyNames(object.prototype)
     let classmiddlewares: Function[] = (object as any)['classmiddlewares'] ?? []
-    let objectMiddlewares: any = object.prototype['middlewares'];
+    let objectMiddlewares: any = (object as any)['middlewares'];
     for (let a of properties) {
-        let method: Function = object.prototype[a];
-        if (typeof method === 'function' && a !== 'constructor') {
+        let instance = new (object as any)()
+        let method: Function = instance[a];
+        if (typeof method === 'function' && a !== 'constructor') { 
 
-            let route: RouteParams = object.prototype['routes'][a]
-            let params: ParamsKey[] = object.prototype['params'] ? object.prototype['params'][a] ?? [] : []
-            var types = Reflect.getMetadata("design:paramtypes", object.prototype, a);
+            let route: RouteParams = instance['routes'][a]
+            let params: ParamsKey[] = instance['params'] ? instance['params'][a] ?? [] : []
+            var types = Reflect.getMetadata("design:paramtypes", instance, a);
             params = params.reduce<ParamsKey[]>((prev, next, index) => {
                 next.type = types[index];
                 prev.push(next)
@@ -102,19 +104,26 @@ export const registerController = async (app: FastifyInstance | Express, object:
             let path = object.prototype['paths'] ? object.prototype['paths'][a] ?? null : null as unknown as swagger.Operation
             if (path) {
                 const keys: Key[] | undefined = [];
-                await pathToRegexp(route.url, keys)
+                await pathToRegexp(route.url, keys)  
                 if ('parameters' in path === false) {
                     path.parameters = []
                 }
                 const toPath = compile(route.url);
-                let swaggerRoute: string = route.url
-                for (let key of keys) {
+                let swaggerRoute: string = route.url 
+                for (let key of keys) { 
                     path.parameters.push({
                         name: key['name'],
                         in: 'path',
                         required: true
                     })
-                    swaggerRoute = toPath({ [key['name']]: `{${key['name']}}` })
+                }
+                //compile route 
+                const pathCompiled =  keys.reduce<Record<string, any>>((p,key)=>{
+                    p[key['name']] = `{${key['name']}}`
+                    return p;
+                }, {})
+                if(Object.keys(pathCompiled).length > 0 ){
+                    swaggerRoute = toPath(pathCompiled).replace('//','/')
                 }
                 // openAPi
                 if (spec) {
@@ -163,7 +172,7 @@ export const registerController = async (app: FastifyInstance | Express, object:
             // routing configuration
             (app as any)[route.method](route.url, applymiddleware, function (req: AppRequest, res: AppResponse) {
                 let methodParams = bindParams(params, req, res, isFastify, cookieparams, app);
-                method(...methodParams).then((data: any) => {
+                instance[a](...methodParams).then((data: any) => {
                     if (renderType) {
                         res.type(renderType);
                     }
@@ -191,6 +200,7 @@ export const registerController = async (app: FastifyInstance | Express, object:
                     }
                     
                 }).catch((err: { message: string, stack: string } | any) => {
+                    console.log(err)
                     res.send({ error: err.message ?? err }).status(500)
                 });
 

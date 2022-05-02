@@ -1,17 +1,40 @@
 import {TwingEnvironment, TwingFunction, TwingLoaderFilesystem} from 'twing';
-
+import path from 'path'
+import fs from 'fs';
 import { NextFunction,Request,Response } from 'express';
 
 export const loader = new TwingLoaderFilesystem();
 export const twig = new TwingEnvironment(loader);
 
-export const setupTwigJsBundle = (p: string) => {
-  let jsBundle = new TwingFunction('jsBundle', async (_file)=>{
-    return `<script defer src="${p}/${_file}"></script>`
+export const setupTwigJsBundle = (p: string, s: string) => {
+  const fileManifest = path.join(p, 'manifest.json'); 
+  let jsScript = '';
+  let cssStyle : string[] = []; 
+  if(fs.existsSync(fileManifest)){
+    const manifestContent = fs.readFileSync(fileManifest).toString()
+    const manifestJson = JSON.parse(manifestContent);
+    const keys = Object.keys(manifestJson)
+    if(keys.length > 0){
+      const key = keys[0]
+      jsScript = manifestJson[key]['file']
+      cssStyle = manifestJson[key]['css']
+    }
+  }
+  let jsBundle = new TwingFunction('jsBundle', async ()=>{
+    return `<script defer src="${s}/${jsScript}"></script>`
+  },[], {
+    is_safe: ['html']
+  });
+  let cssBundle = new TwingFunction('cssBundle', async ()=>{ 
+    return cssStyle.reduce((c,n)=>{
+      return (new String()).concat(c,`<link rel="stylesheet" type="text/css" href="${s}/${n}"></link>`)
+    },'')
+
   },[], {
     is_safe: ['html']
   });
   twig.addFunction(jsBundle);
+  twig.addFunction(cssBundle);
 }
 
 export const twigEngine = (req: Request, res: Response, next :NextFunction) => {
