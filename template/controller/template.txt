@@ -14,7 +14,7 @@ export default class {{name}} {
         }
     })
     @Get('/:id')
-    public async get(@Params('id') id: number, @Headers('authorization') authorization) {
+    public async load(@Params('id') id: number, @Headers('authorization') authorization) {
         return {
             name: 'user',
             params: id,
